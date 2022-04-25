@@ -6,3 +6,22 @@
 
 
 <h1><font color="red">This Is My Official Web Site</font></h>
+
+
+## <!-- Typing SVG -->
+
+<p align="center">
+
+    <a href="https://git.io/J0hKr">
+
+        <img
+
+        src="https://readme-typing-svg.herokuapp.com?size=30&width=800&lines=Welcome+To+Cyber+Maliya+Official +Website+Git..."
+
+            alt="Typing SVG"
+
+        />
+
+    </a>
+
+</p>
