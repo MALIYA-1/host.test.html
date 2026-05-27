@@ -9,8 +9,8 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithPhoneNumber, RecaptchaVerifier, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, addDoc, onSnapshot, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         // Firebase Configuration
@@ -29,149 +29,113 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        const ADMIN_PHONE = "+94766746988"; // සර්ගේ Phone Number එක (මෙතනට +94 එක්ක සර්ගේ නම්බර් එක දාන්න)
-        let confirmationResultGlobal = null;
+        const ADMIN_EMAIL = "shanshan011t@gmail.com"; //
 
-        // reCAPTCHA එක සක්‍රීය කිරීම
-        window.onload = function() {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                'size': 'invisible',
-                'callback': (response) => {}
-            });
-        };
-
-        // 1. SEND OTP CODE (ලොගින් සහ රෙජිස්ටර් දෙකටම පොදුයි)
-        window.sendOTP = function(type) {
-            let phoneInput = type === 'login' ? document.getElementById('login-phone').value : document.getElementById('signup-phone').value;
-            let btn = type === 'login' ? document.getElementById('login-otp-btn') : document.getElementById('signup-otp-btn');
-            let otpArea = type === 'login' ? document.getElementById('login-otp-area') : document.getElementById('signup-otp-area');
-
-            // ශ්‍රී ලංකා නම්බර් Format එක සකස් කිරීම (e.g., 0771234567 -> +94771234567)
-            if(phoneInput.startsWith('0')) {
-                phoneInput = '+94' + phoneInput.substring(1);
-            }
-
-            if(!phoneInput.startsWith('+')) {
-                alert("කරුණාකර නිවැරදි දුරකථන අංකයක් ඇතුළත් කරන්න (e.g., 0771234567)");
-                return;
-            }
-
-            btn.innerText = "Sending Code...";
-            btn.disabled = true;
-
-            signInWithPhoneNumber(auth, phoneInput, window.recaptchaVerifier)
-                .then((confirmationResult) => {
-                    confirmationResultGlobal = confirmationResult;
-                    alert("ඔබගේ දුරකථන අංකයට සත්‍යාපන කේතය (OTP) සාර්ථකව යවන ලදි!");
-                    otpArea.classList.remove('hidden');
-                    btn.innerText = "Resend Code";
-                    btn.disabled = false;
-                }).catch((error) => {
-                    alert("SMS යැවීම අසාර්ථකයි: " + error.message);
-                    btn.innerText = "Get OTP Code";
-                    btn.disabled = false;
-                });
-        }
-
-        // 2. VERIFY OTP & SIGN UP
+        // 1. SIGN UP SYSTEM (හිර නොවන ක්‍රමවේදය)
         window.handleSignUp = function(event) {
             event.preventDefault();
+            
             const name = document.getElementById('signup-name').value;
-            const alYear = document.getElementById('signup-al-year').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
             const institute = document.getElementById('signup-institute').value;
             const paymentMethod = document.getElementById('signup-payment').value;
             const slipFile = document.getElementById('signup-slip').files[0];
-            const code = document.getElementById('signup-otp-code').value;
-
-            if(!confirmationResultGlobal) {
-                alert("කරුණාකර මුලින්ම OTP Code එකක් ලබාගන්න.");
-                return;
-            }
 
             const submitBtn = document.getElementById('signup-btn');
-            submitBtn.innerText = "Verifying Please Wait...";
+            submitBtn.innerText = "Processing Please Wait...";
             submitBtn.disabled = true;
 
-            confirmationResultGlobal.confirm(code)
-                .then((result) => {
-                    const user = result.user;
+            // Firebase Authentication හරහා ගිණුම සෑදීම
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    
                     updateProfile(user, { displayName: name }).then(() => {
+                        
+                        // Slip එකක් අප්ලෝඩ් කර ඇත්නම් පමණක් Storage එකට යැවීම
                         if (slipFile && paymentMethod !== "Free/Scholarship") {
-                            const slipRef = ref(storage, `slips/${user.uid}_${Date.now()}_${slipFile.name}`);
-                            uploadBytes(slipRef, slipFile).then((snapshot) => {
-                                getDownloadURL(snapshot.ref).then((downloadURL) => {
-                                    saveStudentData(user, name, user.phoneNumber, alYear, institute, paymentMethod, downloadURL, submitBtn);
+                            const slipRef = ref(storage, `slips/${user.uid}_${slipFile.name}`);
+                            uploadBytes(slipRef, slipFile)
+                                .then((snapshot) => {
+                                    getDownloadURL(snapshot.ref).then((downloadURL) => {
+                                        saveStudentData(user, name, email, institute, paymentMethod, downloadURL, submitBtn);
+                                    });
+                                })
+                                .catch((err) => {
+                                    // Storage එක වැඩ නොකළත් හිර නොවී දත්ත ටික Save කිරීමට සකස් කර ඇත
+                                    console.error("Storage Error: ", err);
+                                    saveStudentData(user, name, email, institute, paymentMethod, "Slip uploaded (URL protected/error)", submitBtn);
                                 });
-                            }).catch(() => {
-                                saveStudentData(user, name, user.phoneNumber, alYear, institute, paymentMethod, "Slip Protected/Error", submitBtn);
-                            });
                         } else {
-                            saveStudentData(user, name, user.phoneNumber, alYear, institute, paymentMethod, "No Slip (Scholarship)", submitBtn);
+                            saveStudentData(user, name, email, institute, paymentMethod, "No Slip (Scholarship)", submitBtn);
                         }
                     });
-                }).catch((error) => {
-                    alert("ඇතුළත් කළ OTP කේතය වැරදියි! නැවත උත්සාහ කරන්න.");
-                    submitBtn.innerText = "Register & Submit";
+                })
+                .catch((error) => {
+                    alert("ලියාපදිංචිය අසාර්ථකයි: " + error.message);
+                    submitBtn.innerText = "Register & Request Verification";
                     submitBtn.disabled = false;
                 });
         }
 
-        function saveStudentData(user, name, phone, alYear, institute, paymentMethod, slipURL, submitBtn) {
+        // දත්ත Firestore Database හි සුරැකීම
+        function saveStudentData(user, name, email, institute, paymentMethod, slipURL, submitBtn) {
             setDoc(doc(db, "students", user.uid), {
                 uid: user.uid,
                 name: name,
-                phone: phone,
-                alYear: alYear,
+                email: email,
                 institute: institute,
                 paymentMethod: paymentMethod,
                 slipURL: slipURL,
                 isVerified: false,
                 registeredAt: new Date().toLocaleString()
-            }).then(() => {
-                sendEmailNotification("New Student Registration Request", name, phone, alYear, institute, paymentMethod, slipURL);
-                alert("ලියාපදිංචිය සාර්ථකයි! සර් විසින් ඔබව සක්‍රීය (Verify) කරන තෙක් රැඳී සිටින්න.");
-                submitBtn.innerText = "Register & Submit";
-                submitBtn.disabled = false;
-                signOut(auth).then(() => { toggleAuthMode('login'); });
-            }).catch((err) => {
-                alert("Database Error: " + err.message);
-                submitBtn.innerText = "Register & Submit";
+            })
+            .then(() => {
+                sendEmailVerification(user)
+                    .then(() => {
+                        // Formspree ඊමේල් පණිවිඩය යැවීම
+                        sendEmailNotification("New Student Registration Request", name, email, institute, paymentMethod, slipURL);
+                        
+                        alert("ලියාපදිංචිය සාර්ථකයි! ඔබගේ " + email + " ලිපිනයට ලැබුණු Verification ලින්ක් එක ක්ලික් කර ගිණුම සක්‍රීය කර නැවත ලොග් වන්න.");
+                        
+                        // බටන් එක Reset කිරීම සහ Login Box එකට මාරු කිරීම
+                        submitBtn.innerText = "Register & Request Verification";
+                        submitBtn.disabled = false;
+                        signOut(auth).then(() => { toggleAuthMode('login'); });
+                    })
+                    .catch((e) => {
+                        alert("Verification Email එක යැවීමේදී ගැටලුවක්: " + e.message);
+                        submitBtn.innerText = "Register & Request Verification";
+                        submitBtn.disabled = false;
+                    });
+            })
+            .catch((error) => {
+                alert("Database Error: පද්ධතියේ දත්ත සුරැකීමට නොහැකි විය. ඔබගේ Firestore Rules පරීක්ෂා කරන්න! -> " + error.message);
+                submitBtn.innerText = "Register & Request Verification";
                 submitBtn.disabled = false;
             });
         }
 
-        // 3. VERIFY OTP & LOGIN
+        // 2. LOGIN (Strict Verification Check)
         window.handleLogin = function(event) {
             event.preventDefault();
-            const code = document.getElementById('login-otp-code').value;
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
 
-            if(!confirmationResultGlobal) {
-                alert("කරුණාකර මුලින්ම OTP Code එක ලබාගන්න.");
-                return;
-            }
-
-            confirmationResultGlobal.confirm(code)
-                .then(async (result) => {
-                    const user = result.user;
-                    
-                    // Admin ද බලන්න
-                    if(user.phoneNumber === ADMIN_PHONE) {
-                        alert("සාර්ථකව සර් ලෙස සම්බන්ධ විය!");
-                        return;
-                    }
-
-                    // ශිෂ්‍යයා සර් Verify කරලද බලන්න
-                    const docRef = doc(db, "students", user.uid);
-                    const docSnap = await getDoc(docRef);
-
-                    if (docSnap.exists() && docSnap.data().isVerified === true) {
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    if (user.emailVerified) {
+                        setDoc(doc(db, "students", user.uid), { isVerified: true }, { merge: true });
                         alert("සාර්ථකව පද්ධතියට සම්බන්ධ විය!");
                     } else {
-                        alert("ඔබගේ ගිණුම තවමත් සර් විසින් සක්‍රීය (Verify) කර නොමැත. කරුණාකර රෙසිට්පත පරීක්ෂා කරන තෙක් රැඳී සිටින්න!");
+                        alert("ඇතුළුවීම අසාර්ථකයි! කරුණාකර ඔබගේ ඊමේල් ලිපිනයට ලැබුණු ලින්ක් එක ක්ලික් කර එය තහවුරු (Verify) කරන්න.");
                         signOut(auth);
                     }
-                }).catch(() => {
-                    alert("ඇතුළත් කළ OTP කේතය වැරදියි!");
+                })
+                .catch((error) => {
+                    alert("ඊමේල් හෝ මුරපදය වැරදියි, නැතහොත් ඔබ තවමත් ලියාපදිංචි වී නොමැත!");
                 });
         }
 
@@ -180,43 +144,31 @@
         }
 
         // Session පාලනය
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(auth, (user) => {
             const signupGate = document.getElementById('auth-gate');
             const mainContent = document.getElementById('main-content');
             
-            if (user) {
-                let isVerifiedStudent = false;
-                let isAdmin = (user.phoneNumber === ADMIN_PHONE);
-
-                if(!isAdmin) {
-                    const docSnap = await getDoc(doc(db, "students", user.uid));
-                    if(docSnap.exists() && docSnap.data().isVerified === true) {
-                        isVerifiedStudent = true;
-                    }
+            if (user && user.emailVerified) {
+                document.getElementById('nav-user-name').innerText = user.displayName;
+                document.getElementById('nav-user-badge').innerText = user.email;
+                
+                if(user.email === ADMIN_EMAIL) {
+                    document.getElementById('nav-user-role').innerText = "ADMIN ACCESS";
+                    document.getElementById('nav-user-role').className = "bg-red-950 text-red-400 px-2 py-1 rounded font-bold text-2xs";
+                } else {
+                    document.getElementById('nav-user-role').innerText = "VERIFIED STUDENT";
                 }
 
-                if(isAdmin || isVerifiedStudent) {
-                    document.getElementById('nav-user-name').innerText = user.displayName || "Admin";
-                    document.getElementById('nav-user-badge').innerText = user.phoneNumber;
-                    
-                    if(isAdmin) {
-                        document.getElementById('nav-user-role').innerText = "ADMIN ACCESS";
-                        document.getElementById('nav-user-role').className = "bg-red-950 text-red-400 px-2 py-1 rounded font-bold text-2xs";
-                    } else {
-                        document.getElementById('nav-user-role').innerText = "VERIFIED STUDENT";
-                    }
-
-                    signupGate.classList.add('hidden');
-                    mainContent.classList.remove('hidden');
-                    loadComments(isAdmin);
-                    return;
-                }
+                signupGate.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                loadComments(user.email === ADMIN_EMAIL);
+            } else {
+                signupGate.classList.remove('hidden');
+                mainContent.classList.add('hidden');
             }
-            signupGate.classList.remove('hidden');
-            mainContent.classList.add('hidden');
         });
 
-        // 4. LIVE COMMENTS
+        // 3. LIVE COMMENTS SYSTEM
         window.submitComment = function(event) {
             event.preventDefault();
             const commentTxt = document.getElementById('comment-text').value;
@@ -224,13 +176,15 @@
 
             if(user) {
                 addDoc(collection(db, "comments"), {
-                    username: user.displayName || "Admin",
-                    phone: user.phoneNumber,
+                    username: user.displayName,
+                    email: user.email,
                     text: commentTxt,
                     timestamp: Date.now(),
                     dateString: new Date().toLocaleString()
                 }).then(() => {
                     document.getElementById('comment-form').reset();
+                }).catch((err) => {
+                    alert("Comment සේව් කිරීමට නොහැකි විය: " + err.message);
                 });
             }
         }
@@ -240,20 +194,23 @@
             onSnapshot(q, (snapshot) => {
                 const container = document.getElementById('comments-container');
                 container.innerHTML = "";
+                
                 if(snapshot.empty) {
                     container.innerHTML = `<p class="text-gray-500 text-xs italic">තවම අදහස් කිසිවක් නොමැත.</p>`;
                     return;
                 }
+
                 snapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const id = docSnap.id;
                     const deleteBtn = isAdmin ? `<button onclick="deleteComment('${id}')" class="text-red-500 hover:text-red-400 text-xs font-bold cursor-pointer"><i class="fa-solid fa-trash mr-1"></i>Delete</button>` : "";
+
                     container.innerHTML += `
                         <div class="bg-gray-950 border border-gray-800 p-4 rounded-xl flex justify-between items-start text-left">
                             <div>
                                 <div class="flex items-center space-x-2">
                                     <span class="text-cyan-400 font-bold text-sm">${data.username}</span>
-                                    <span class="text-gray-600 text-2xs font-mono">(${data.phone})</span>
+                                    <span class="text-gray-600 text-2xs font-mono">(${data.email})</span>
                                 </div>
                                 <p class="text-gray-300 text-xs mt-1.5">${data.text}</p>
                                 <span class="text-gray-600 text-3xs block mt-1">${data.dateString}</span>
@@ -271,22 +228,21 @@
             }
         }
 
-        // Notification System
-        function sendEmailNotification(type, name, phone, alYear, institute, payment, slipURL) {
+        // Formspree ඊමේල් පද්ධතිය
+        function sendEmailNotification(type, name, email, institute, payment, slipURL) {
             fetch("https://formspree.io/f/mzdwyajk", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     Subject: type,
                     Student_Name: name,
-                    Student_Phone: phone,
-                    AL_Year: alYear,
+                    Student_Email: email,
                     Institute: institute,
                     Payment_Method: payment,
-                    Slip_URL: slipURL,
+                    Slip_Attachment_URL: slipURL,
                     Time: new Date().toLocaleString()
                 })
-            });
+            }).catch(err => console.log("Notification Email failed but flow continuous."));
         }
 
         window.toggleAuthMode = function(mode) {
@@ -302,8 +258,6 @@
 </head>
 <body class="bg-gray-900 text-white font-sans antialiased">
 
-    <div id="recaptcha-container"></div>
-
     <div id="auth-gate" class="fixed inset-0 bg-gray-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
         
         <div id="login-box" class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl my-auto">
@@ -313,17 +267,14 @@
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Phone Number</label>
-                    <div class="flex gap-2">
-                        <input type="tel" id="login-phone" required placeholder="e.g., 0771234567" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2 text-white text-sm focus:outline-none">
-                        <button type="button" id="login-otp-btn" onclick="sendOTP('login')" class="bg-cyan-600 hover:bg-cyan-500 text-gray-900 font-bold px-3 py-2 rounded-lg text-xs whitespace-nowrap cursor-pointer">Get OTP</button>
-                    </div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
+                    <input type="email" id="login-email" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500 text-sm">
                 </div>
-                <div id="login-otp-area" class="hidden">
-                    <label class="block text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Enter 6-Digit OTP Code</label>
-                    <input type="text" id="login-otp-code" placeholder="XXXXXX" class="w-full bg-gray-950 border border-amber-800 rounded-lg px-4 py-2 text-white text-center font-mono text-lg tracking-widest focus:outline-none">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Password</label>
+                    <input type="password" id="login-password" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500 text-sm">
                 </div>
-                <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold py-2.5 rounded-lg cursor-pointer text-sm">Log In via OTP</button>
+                <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold py-2.5 rounded-lg cursor-pointer text-sm">Log In</button>
             </form>
             <p class="text-xs text-center text-gray-400 mt-4">නව ශිෂ්‍යයෙක්ද? <span onclick="toggleAuthMode('signup')" class="text-cyan-400 font-bold cursor-pointer hover:underline">ලියාපදිංචි වන්න</span></p>
         </div>
@@ -338,23 +289,12 @@
                     <input type="text" id="signup-name" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Phone Number</label>
-                    <div class="flex gap-2">
-                        <input type="tel" id="signup-phone" required placeholder="0771234567" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
-                        <button type="button" id="signup-otp-btn" onclick="sendOTP('signup')" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1 rounded-lg text-2xs cursor-pointer whitespace-nowrap">Get OTP</button>
-                    </div>
-                </div>
-                <div id="signup-otp-area" class="hidden">
-                    <label class="block text-3xs font-bold text-amber-400 uppercase tracking-wider mb-1">Enter OTP Code</label>
-                    <input type="text" id="signup-otp-code" placeholder="XXXXXX" class="w-full bg-gray-950 border border-amber-800 rounded-lg px-3 py-1.5 text-white text-center font-mono text-sm focus:outline-none">
+                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Email Address</label>
+                    <input type="email" id="signup-email" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">A/L Year</label>
-                    <select id="signup-al-year" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
-                        <option value="2026">2026 A/L</option>
-                        <option value="2027">2027 A/L</option>
-                        <option value="2028">2028 A/L</option>
-                    </select>
+                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Password</label>
+                    <input type="password" id="signup-password" required minlength="6" placeholder="අවම අකුරු 6ක්" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Select Institute</label>
@@ -376,7 +316,7 @@
                     <label class="block text-3xs font-bold text-amber-400 uppercase tracking-wider mb-1"><i class="fa-solid fa-file-image mr-1"></i>Upload Payment Slip</label>
                     <input type="file" id="signup-slip" accept="image/*" class="w-full bg-gray-950 border border-gray-800 text-gray-400 rounded text-xs p-1 focus:outline-none">
                 </div>
-                <button type="submit" id="signup-btn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-lg text-xs uppercase tracking-wider cursor-pointer">Register & Submit</button>
+                <button type="submit" id="signup-btn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-lg text-xs uppercase tracking-wider cursor-pointer">Register & Request Verification</button>
             </form>
             <p class="text-3xs text-center text-gray-400 mt-3">දැනටමත් ගිණුමක් තිබේද? <span onclick="toggleAuthMode('login')" class="text-purple-400 font-bold cursor-pointer hover:underline">ලොග් වන්න</span></p>
         </div>
@@ -430,7 +370,7 @@
                 <div>
                     <h3 class="text-lg font-bold text-orange-400 mb-4"><i class="fa-solid fa-font mr-2"></i>Real Sinhala Unicode Converter</h3>
                     <div class="space-y-2 bg-gray-950 p-4 rounded-xl border border-gray-800">
-                        <textarea id="unicode-input" onkeyup="convertSinglishToSinhala()" placeholder="Type Singlish here..." class="w-full bg-gray-900 border border-gray-800 rounded p-2 h-20 text-xs text-white focus:outline-none text-left"></textarea>
+                        <textarea id="unicode-input" onkeyup="convertSinglishToSinhala()" placeholder="Type Singlish here... (e.g., amma, lanka)" class="w-full bg-gray-900 border border-gray-800 rounded p-2 h-20 text-xs text-white focus:outline-none text-left"></textarea>
                         <div id="unicode-output" class="w-full bg-gray-900 border border-gray-800 rounded p-2 min-h-[40px] text-xs text-orange-400 text-left font-bold whitespace-pre-wrap">...</div>
                     </div>
                 </div>
@@ -481,7 +421,8 @@
                 [/m/g, "ම"], [/n/g, "න"], [/o/g, "ඔ"], [/p/g, "ප"], [/r/g, "ර"], [/s/g, "ස"],
                 [/t/g, "ට"], [/u/g, "උ"], [/v/g, "ව"], [/w/g, "ව"], [/y/g, "ය"]
             ];
-            let output = text.toLowerCase().replace(/amma/g, "අම්මා").replace(/lanka/g, "ලංකා");
+            let output = text.toLowerCase()
+                .replace(/amma/g, "අම්මා").replace(/lanka/g, "ලංකා").replace(/heshan/g, "හේෂාන්");
             rules.forEach(rule => { output = output.replace(rule[0], rule[1]); });
             document.getElementById('unicode-output').innerText = output || "...";
         }
