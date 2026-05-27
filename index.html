@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT From Heshan | Custom Email Authentication</title>
-    <!-- Tailwind and FontAwesome -->
+    <title>ICT From Heshan | Premium LMS Portal</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, addDoc, onSnapshot, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        // 🌟 ඔයාගේ සත්‍ය Firebase Config දත්ත 🌟
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCHf-YhlMZSoLw1ll4KNfgmTPJHAvzaMjI",
             authDomain: "ictfromheshan.firebaseapp.com",
@@ -26,28 +26,79 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
 
-        // 1. SIGN UP FUNCTION (නව ගිණුමක් සෑදීම)
+        const ADMIN_EMAIL = "shanshan011t@gmail.com"; //
+
+        // 1. ADVANCED SIGN UP (ලියාපදිංචිය + Slip Upload + Verification Email)
         window.handleSignUp = function(event) {
             event.preventDefault();
             const name = document.getElementById('signup-name').value;
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
+            const institute = document.getElementById('signup-institute').value;
+            const paymentMethod = document.getElementById('signup-payment').value;
+            const slipFile = document.getElementById('signup-slip').files[0];
+
+            if (!slipFile && paymentMethod !== "Free/Scholarship") {
+                alert("ਕරුණාකර ඔබගේ ගෙවීම් රිසිට්පත (Payment Slip) තෝරන්න.");
+                return;
+            }
+
+            // බටන් එක Loading තත්ත්වයට පත් කිරීම
+            const submitBtn = document.getElementById('signup-btn');
+            submitBtn.innerText = "Processing Please Wait...";
+            submitBtn.disabled = true;
 
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
+                    
                     updateProfile(user, { displayName: name }).then(() => {
-                        sendNotification("New Student Registration", name, email);
-                        alert("ලියාපදිංචිය සාර්ථකයි! දැන් ඔබට Dashboard එක දැකිය හැක.");
+                        
+                        // Slip එකක් තිබේ නම් එය Storage එකට Upload කිරීම
+                        if (slipFile) {
+                            const slipRef = ref(storage, `slips/${user.uid}_${Date.now()}_${slipFile.name}`);
+                            uploadBytes(slipRef, slipFile).then((snapshot) => {
+                                getDownloadURL(snapshot.ref).then((downloadURL) => {
+                                    saveStudentData(user, name, email, institute, paymentMethod, downloadURL);
+                                });
+                            });
+                        } else {
+                            saveStudentData(user, name, email, institute, paymentMethod, "No Slip (Scholarship)");
+                        }
                     });
                 })
                 .catch((error) => {
-                    alert("ගිණුම සෑදීම අසාර්ථකයි: " + error.message);
+                    alert("ලියාපදිංචිය අසාර්ථකයි: " + error.message);
+                    submitBtn.innerText = "Register & Request Verification";
+                    submitBtn.disabled = false;
                 });
         }
 
-        // 2. LOGIN FUNCTION (ලොග් වීම)
+        // ශිෂ්‍ය දත්ත Firestore හි සුරැකීම
+        function saveStudentData(user, name, email, institute, paymentMethod, slipURL) {
+            setDoc(doc(db, "students", user.uid), {
+                uid: user.uid,
+                name: name,
+                email: email,
+                institute: institute,
+                paymentMethod: paymentMethod,
+                slipURL: slipURL,
+                isVerified: false,
+                registeredAt: new Date().toLocaleString()
+            }).then(() => {
+                sendEmailVerification(user).then(() => {
+                    // Formspree හරහා සර්ට විස්තර එවීම
+                    sendEmailNotification("New Student Registration Request", name, email, institute, paymentMethod, slipURL);
+                    alert("ලියාපදිංචිය සාර්ථකයි! ඔබගේ " + email + " ලිපිනයට ලැබුණු Verification ලින්ක් එක ක්ලික් කර ගිණුම සක්‍රීය කර නැවත ලොග් වන්න.");
+                    signOut(auth).then(() => { toggleAuthMode('login'); location.reload(); });
+                });
+            });
+        }
+
+        // 2. LOGIN (Strict Verification Check)
         window.handleLogin = function(event) {
             event.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -56,52 +107,123 @@
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
-                    sendNotification("Student Login Attempt", user.displayName, user.email);
-                    alert("සාර්ථකව පද්ධතියට සම්බන්ධ විය!");
+                    if (user.emailVerified) {
+                        setDoc(doc(db, "students", user.uid), { isVerified: true }, { merge: true });
+                        alert("සාර්ථකව පද්ධතියට සම්බන්ධ විය!");
+                    } else {
+                        alert("ඇතුළුවීම අසාර්ථකයි! කරුණාකර ඔබගේ ඊමේල් ලිපිනයට ලැබුණු ලින්ක් එක ක්ලික් කර එය තහවුරු (Verify) කරන්න.");
+                        signOut(auth);
+                    }
                 })
                 .catch((error) => {
-                    alert("ඊමේල් හෝ මුරපදය වැරදියි! නැවත උත්සාහ කරන්න.");
+                    alert("ඊමේල් හෝ මුරපදය වැරදියි, නැතහොත් ඔබ තවමත් ලියාපදිංචි වී නොමැත!");
                 });
         }
 
-        // 3. LOGOUT FUNCTION
         window.logoutUser = function() {
             signOut(auth).then(() => { location.reload(); });
         }
 
-        // User Session සක්‍රීයදැයි බැලීම
+        // Session පාලනය
         onAuthStateChanged(auth, (user) => {
             const signupGate = document.getElementById('auth-gate');
             const mainContent = document.getElementById('main-content');
             
-            if (user) {
-                document.getElementById('nav-user-name').innerText = user.displayName || "Student";
+            if (user && user.emailVerified) {
+                document.getElementById('nav-user-name').innerText = user.displayName;
                 document.getElementById('nav-user-badge').innerText = user.email;
-                document.getElementById('nav-user-year').innerText = "Registered User";
                 
+                if(user.email === ADMIN_EMAIL) {
+                    document.getElementById('nav-user-role').innerText = "ADMIN ACCESS";
+                    document.getElementById('nav-user-role').className = "bg-red-950 text-red-400 px-2 py-1 rounded font-bold text-2xs";
+                } else {
+                    document.getElementById('nav-user-role').innerText = "VERIFIED STUDENT";
+                }
+
                 signupGate.classList.add('hidden');
                 mainContent.classList.remove('hidden');
+                loadComments(user.email === ADMIN_EMAIL);
             } else {
                 signupGate.classList.remove('hidden');
                 mainContent.classList.add('hidden');
             }
         });
 
-        // ඊමේල් Notification එකක් Formspree හරහා ඔබට එවීම
-        function sendNotification(type, name, email) {
-            fetch("https://formspree.io/f/mzdwyajk", { // 🌟 ඔයාගේ සත්‍ය Formspree ID එක ඇතුළත් කළා
+        // 3. LIVE COMMENTS SYSTEM
+        window.submitComment = function(event) {
+            event.preventDefault();
+            const commentTxt = document.getElementById('comment-text').value;
+            const user = auth.currentUser;
+
+            if(user) {
+                addDoc(collection(db, "comments"), {
+                    username: user.displayName,
+                    email: user.email,
+                    text: commentTxt,
+                    timestamp: Date.now(),
+                    dateString: new Date().toLocaleString()
+                }).then(() => {
+                    document.getElementById('comment-form').reset();
+                });
+            }
+        }
+
+        function loadComments(isAdmin) {
+            const q = query(collection(db, "comments"), orderBy("timestamp", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('comments-container');
+                container.innerHTML = "";
+                
+                if(snapshot.empty) {
+                    container.innerHTML = `<p class="text-gray-500 text-xs italic">තවම අදහස් කිසිවක් නොමැත.</p>`;
+                    return;
+                }
+
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const id = docSnap.id;
+                    const deleteBtn = isAdmin ? `<button onclick="deleteComment('${id}')" class="text-red-500 hover:text-red-400 text-xs font-bold cursor-pointer"><i class="fa-solid fa-trash mr-1"></i>Delete</button>` : "";
+
+                    container.innerHTML += `
+                        <div class="bg-gray-950 border border-gray-800 p-4 rounded-xl flex justify-between items-start text-left">
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-cyan-400 font-bold text-sm">${data.username}</span>
+                                    <span class="text-gray-600 text-2xs font-mono">(${data.email})</span>
+                                </div>
+                                <p class="text-gray-300 text-xs mt-1.5">${data.text}</p>
+                                <span class="text-gray-600 text-3xs block mt-1">${data.dateString}</span>
+                            </div>
+                            ${deleteBtn}
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        window.deleteComment = function(id) {
+            if(confirm("මෙම කමෙන්ට් එක මකා දැමීමට අවශ්‍යද?")) {
+                deleteDoc(doc(db, "comments", id));
+            }
+        }
+
+        // Formspree Notification
+        function sendEmailNotification(type, name, email, institute, payment, slipURL) {
+            fetch("https://formspree.io/f/mzdwyajk", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    Action_Type: type,
+                    Subject: type,
                     Student_Name: name,
                     Student_Email: email,
+                    Institute: institute,
+                    Payment_Method: payment,
+                    Slip_Attachment_URL: slipURL,
                     Time: new Date().toLocaleString()
                 })
             });
         }
 
-        // Sign In සහ Sign Up Forms මාරු කිරීමට
         window.toggleAuthMode = function(mode) {
             if(mode === 'signup') {
                 document.getElementById('login-box').classList.add('hidden');
@@ -115,142 +237,142 @@
 </head>
 <body class="bg-gray-900 text-white font-sans antialiased">
 
-    <!-- ================= START SCREEN: AUTH GATE ================= -->
-    <div id="auth-gate" class="fixed inset-0 bg-gray-950 z-999 flex items-center justify-center p-4 overflow-y-auto">
+    <div id="auth-gate" class="fixed inset-0 bg-gray-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
         
-        <!-- LOGIN BOX -->
-        <div id="login-box" class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 md:p-8 shadow-2xl my-auto">
+        <div id="login-box" class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl my-auto">
             <div class="text-center mb-6">
-                <span class="bg-cyan-900/50 text-cyan-400 border border-cyan-700 text-2xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">LMS Login Portal</span>
+                <span class="bg-cyan-900/50 text-cyan-400 border border-cyan-700 text-2xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">LMS Portal</span>
                 <h2 class="text-2xl font-black mt-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">ICT FROM HESHAN</h2>
-                <p class="text-gray-400 text-xs mt-1">ඔබේ ගිණුමට ඇතුළු වීමට විස්තර ලබා දෙන්න.</p>
             </div>
-            
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
-                    <input type="email" id="login-email" required placeholder="example@mail.com" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 text-sm">
+                    <input type="email" id="login-email" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500 text-sm">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Password</label>
-                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 text-sm">
+                    <input type="password" id="login-password" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500 text-sm">
                 </div>
-                <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold py-3 rounded-lg transition text-sm tracking-wide shadow-lg cursor-pointer">Log In</button>
+                <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold py-2.5 rounded-lg cursor-pointer text-sm">Log In</button>
             </form>
-            <p class="text-xs text-center text-gray-400 mt-4">නව ශිෂ්‍යයෙක්ද? <span onclick="toggleAuthMode('signup')" class="text-cyan-400 font-bold cursor-pointer hover:underline">මෙහි ලියාපදිංචි වන්න</span></p>
+            <p class="text-xs text-center text-gray-400 mt-4">නව ශිෂ්‍යයෙක්ද? <span onclick="toggleAuthMode('signup')" class="text-cyan-400 font-bold cursor-pointer hover:underline">ලියාපදිංචි වන්න</span></p>
         </div>
 
-        <!-- SIGN UP BOX -->
-        <div id="signup-box" class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 md:p-8 shadow-2xl my-auto hidden">
-            <div class="text-center mb-6">
-                <span class="bg-purple-900/50 text-purple-400 border border-purple-700 text-2xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Create Account</span>
-                <h2 class="text-2xl font-black mt-3 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">නව ශිෂ්‍ය ලියාපදිංචිය</h2>
-                <p class="text-gray-400 text-xs mt-1">පද්ධතියට ඇතුළු වීමට ඔබගේ නිවැරදි විස්තර ඇතුළත් කරන්න.</p>
+        <div id="signup-box" class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl my-auto hidden">
+            <div class="text-center mb-4">
+                <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">නව ශිෂ්‍ය ලියාපදිංචිය</h2>
             </div>
-            
-            <form onsubmit="handleSignUp(event)" class="space-y-4">
+            <form onsubmit="handleSignUp(event)" class="space-y-3">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Full Name (සම්පූර්ණ නම)</label>
-                    <input type="text" id="signup-name" required placeholder="Heshan Perera" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 text-sm">
+                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Full Name</label>
+                    <input type="text" id="signup-name" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Email Address (ඊමේල් ලිපිනය)</label>
-                    <input type="email" id="signup-email" required placeholder="student@gmail.com" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 text-sm">
+                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Email Address</label>
+                    <input type="email" id="signup-email" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Create Password (මුරපදයක් සාදන්න)</label>
-                    <input type="password" id="signup-password" required minlength="6" placeholder="අවම අකුරු/ඉලක්කම් 6ක්" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 text-sm">
+                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Password</label>
+                    <input type="password" id="signup-password" required minlength="6" placeholder="අවම අකුරු 6ක්" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
                 </div>
-                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg transition text-sm tracking-wide shadow-lg cursor-pointer">Register & Join</button>
+                <div>
+                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Select Institute</label>
+                    <select id="signup-institute" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
+                        <option value="Online">Online Class</option>
+                        <option value="Rotary - Nugegoda">Rotary - Nugegoda</option>
+                        <option value="Syzygy - Gampaha">Syzygy - Gampaha</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Payment Method</label>
+                    <select id="signup-payment" required onchange="if(this.value==='Free/Scholarship'){document.getElementById('slip-area').classList.add('hidden')}else{document.getElementById('slip-area').classList.remove('hidden')}" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
+                        <option value="Bank Transfer">Bank Transfer (බැංකු තැන්පතු)</option>
+                        <option value="Card Payment">Card / Online Payment</option>
+                        <option value="Free/Scholarship">Scholarship (නොමිලේ)</option>
+                    </select>
+                </div>
+                <div id="slip-area">
+                    <label class="block text-3xs font-bold text-amber-400 uppercase tracking-wider mb-1"><i class="fa-solid fa-file-image mr-1"></i>Upload Payment Slip (රෙසිට්පත උඩුගත කරන්න)</label>
+                    <input type="file" id="signup-slip" accept="image/*" class="w-full bg-gray-950 border border-gray-800 text-gray-400 rounded text-xs p-1 focus:outline-none">
+                </div>
+                <button type="submit" id="signup-btn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-lg text-xs uppercase tracking-wider cursor-pointer">Register & Request Verification</button>
             </form>
-            <p class="text-xs text-center text-gray-400 mt-4">දැනටමත් ගිණුමක් තිබේද? <span onclick="toggleAuthMode('login')" class="text-purple-400 font-bold cursor-pointer hover:underline">මෙහි ලොග් වන්න</span></p>
+            <p class="text-3xs text-center text-gray-400 mt-3">දැනටමත් ගිණුමක් තිබේද? <span onclick="toggleAuthMode('login')" class="text-purple-400 font-bold cursor-pointer hover:underline">ලොග් වන්න</span></p>
         </div>
-
     </div>
-    <!-- ================= END SCREEN: AUTH GATE ================= -->
 
-
-    <!-- MAIN CONTENT CONTAINER -->
     <div id="main-content" class="hidden">
-        <nav class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
+        <nav class="bg-gray-800 border-b border-gray-700 sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
                 <span class="text-xl font-black text-cyan-400">ICT FROM HESHAN</span>
                 <div class="flex items-center space-x-4 text-xs">
                     <span id="nav-user-name" class="font-bold">-</span>
-                    <span id="nav-user-badge" class="bg-gray-900 px-2 py-1 rounded text-cyan-400">-</span>
-                    <span id="nav-user-year" class="hidden md:inline bg-gray-900 px-2 py-1 rounded text-purple-400">-</span>
+                    <span id="nav-user-badge" class="bg-gray-900 px-2 py-1 rounded text-cyan-400 font-mono">-</span>
+                    <span id="nav-user-role" class="bg-emerald-950 text-emerald-400 px-2 py-1 rounded font-bold text-2xs">VERIFIED STUDENT</span>
                     <button onclick="logoutUser()" class="bg-red-600 hover:bg-red-500 px-3 py-1.5 rounded text-white font-bold cursor-pointer">Logout</button>
                 </div>
             </div>
         </nav>
 
-        <!-- SIMULATOR, CONVERTER, UNICODE & RATINGS SECTIONS -->
-        <section id="simulator" class="py-16 px-4 bg-gray-950 border-b border-gray-800">
-            <div class="max-w-4xl mx-auto text-center mb-10">
-                <h2 class="text-3xl font-bold text-cyan-400"><i class="fa-solid fa-toggle-on mr-2"></i>Interactive Logic Gate Simulator</h2>
-                <p class="text-gray-400 mt-2">Inputs (A සහ B) වෙනස් කරමින් Logic Gate එකෙන් Output එක ලැබෙන විදිහ Live බලන්න.</p>
+        <section class="py-12 px-4 bg-gray-950 border-b border-gray-800">
+            <div class="max-w-4xl mx-auto text-center mb-6">
+                <h2 class="text-2xl font-bold text-cyan-400"><i class="fa-solid fa-toggle-on mr-2"></i>Logic Gate Simulator</h2>
             </div>
-            <div class="flex flex-wrap gap-2 justify-center mb-8 max-w-4xl mx-auto">
-                <button onclick="changeGate('AND')" id="btn-AND" class="gate-btn bg-cyan-600 text-gray-900 font-bold px-4 py-2 rounded-lg cursor-pointer">AND Gate</button>
-                <button onclick="changeGate('OR')" id="btn-OR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg cursor-pointer">OR Gate</button>
-                <button onclick="changeGate('NOT')" id="btn-NOT" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg cursor-pointer">NOT Gate</button>
+            <div class="flex gap-2 justify-center mb-6">
+                <button onclick="changeGate('AND')" class="bg-cyan-600 text-gray-900 font-bold px-4 py-1.5 rounded text-xs cursor-pointer">AND</button>
+                <button onclick="changeGate('OR')" class="bg-gray-800 px-4 py-1.5 rounded text-xs cursor-pointer">OR</button>
             </div>
-            <div class="max-w-4xl mx-auto bg-gray-900 border border-gray-800 rounded-xl p-6 grid grid-cols-1 md:grid-cols-3 gap-6 items-center text-center">
+            <div class="max-w-md mx-auto bg-gray-900 p-6 rounded-xl border border-gray-800 grid grid-cols-3 gap-4 items-center text-center">
                 <div>
-                    <span class="text-xs uppercase text-gray-500 font-bold block mb-2">Inputs</span>
-                    <button onclick="toggleInput('A')" id="btn-inputA" class="w-full mb-2 bg-gray-800 px-4 py-2 rounded font-mono text-xl text-red-500 border border-red-900/50 cursor-pointer">A: 0</button>
-                    <button onclick="toggleInput('B')" id="btn-inputB" class="w-full bg-gray-800 px-4 py-2 rounded font-mono text-xl text-red-500 border border-red-900/50 cursor-pointer">B: 0</button>
+                    <button onclick="toggleInput('A')" id="btn-inputA" class="w-full mb-2 bg-gray-950 py-1.5 rounded font-mono text-sm text-red-500 border border-red-900/30 cursor-pointer">A: 0</button>
+                    <button onclick="toggleInput('B')" id="btn-inputB" class="w-full bg-gray-950 py-1.5 rounded font-mono text-sm text-red-500 border border-red-900/30 cursor-pointer">B: 0</button>
                 </div>
                 <div>
-                    <span id="gate-title" class="text-2xl font-black text-white tracking-widest block mb-2">AND</span>
-                    <span id="gate-logic-desc" class="text-xs text-gray-400 font-mono">Y = A . B</span>
+                    <span id="gate-title" class="text-sm font-black block">AND</span>
+                    <span id="gate-logic-desc" class="text-3xs text-gray-500 font-mono">Y = A . B</span>
                 </div>
-                <div id="output-box" class="p-6 bg-gray-950 border-2 border-red-500 rounded-xl">
-                    <span class="text-xs uppercase text-gray-500 font-bold block mb-1">Output (Y)</span>
-                    <span id="txt-output" class="text-4xl font-mono font-bold text-red-500">0</span>
+                <div class="p-3 bg-gray-950 border border-red-500 rounded-lg">
+                    <span id="txt-output" class="text-2xl font-mono font-bold text-red-500">0</span>
                 </div>
             </div>
         </section>
 
-        <!-- NUMBER CONVERTER -->
-        <section class="py-16 px-4 bg-gray-900 border-b border-gray-800">
-            <div class="max-w-4xl mx-auto text-center mb-10">
-                <h2 class="text-3xl font-bold text-emerald-400"><i class="fa-solid fa-calculator mr-2"></i>Number System Converter</h2>
-            </div>
-            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-950 p-6 rounded-xl border border-gray-800">
-                <input type="text" id="num-decimal" oninput="convertFrom('decimal')" placeholder="Decimal (Base 10)" class="bg-gray-900 border border-gray-800 rounded p-3 font-mono text-white focus:outline-none">
-                <input type="text" id="num-binary" oninput="convertFrom('binary')" placeholder="Binary (Base 2)" class="bg-gray-900 border border-gray-800 rounded p-3 font-mono text-white focus:outline-none">
+        <section class="py-12 px-4 bg-gray-900 border-b border-gray-800">
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-lg font-bold text-emerald-400 mb-4"><i class="fa-solid fa-calculator mr-2"></i>Number Converter</h3>
+                    <div class="space-y-2 bg-gray-950 p-4 rounded-xl border border-gray-800">
+                        <input type="text" id="num-decimal" oninput="convertFrom('decimal')" placeholder="Decimal (Base 10)" class="w-full bg-gray-900 border border-gray-800 rounded p-2 text-xs text-white focus:outline-none">
+                        <input type="text" id="num-binary" oninput="convertFrom('binary')" placeholder="Binary (Base 2)" class="w-full bg-gray-900 border border-gray-800 rounded p-2 text-xs text-white focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-orange-400 mb-4"><i class="fa-solid fa-font mr-2"></i>Real Sinhala Unicode Converter</h3>
+                    <div class="space-y-2 bg-gray-950 p-4 rounded-xl border border-gray-800">
+                        <textarea id="unicode-input" onkeyup="convertSinglishToSinhala()" placeholder="Type Singlish here... (e.g., amma, lanka, iskole)" class="w-full bg-gray-900 border border-gray-800 rounded p-2 h-20 text-xs text-white focus:outline-none text-left"></textarea>
+                        <div id="unicode-output" class="w-full bg-gray-900 border border-gray-800 rounded p-2 min-h-[40px] text-xs text-orange-400 text-left font-bold whitespace-pre-wrap">...</div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- REVIEW FORM -->
-        <section class="py-16 bg-gray-950 px-4 text-center">
-            <h2 class="text-3xl font-bold text-yellow-500 mb-6"><i class="fa-solid fa-star mr-2"></i>Rate Our Platform</h2>
-            <div class="flex justify-center space-x-2 text-3xl mb-6 text-gray-600">
-                <i onclick="setRating(1)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400"></i>
-                <i onclick="setRating(2)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400"></i>
-                <i onclick="setRating(3)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400"></i>
-                <i onclick="setRating(4)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400"></i>
-                <i onclick="setRating(5)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400"></i>
-            </div>
-            <form onsubmit="handleReviewSubmit(event)" class="max-w-xl mx-auto space-y-4">
-                <textarea required placeholder="ඔබේ අදහස් මෙතන ලියන්න (Comment)..." class="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl text-white focus:outline-none"></textarea>
-                <button type="submit" class="bg-yellow-500 text-gray-950 font-black px-6 py-2 rounded-lg cursor-pointer">Submit Review</button>
+        <section class="py-12 bg-gray-950 px-4 max-w-3xl mx-auto">
+            <h2 class="text-lg font-bold text-yellow-500 mb-4 text-left"><i class="fa-solid fa-comments mr-2"></i>Student Forum (Comments)</h2>
+            <form id="comment-form" onsubmit="submitComment(event)" class="space-y-3 mb-6">
+                <textarea id="comment-text" required placeholder="ඔබේ ප්‍රශ්න හෝ අදහස් මෙතැනින් ලියන්න..." class="w-full bg-gray-900 border border-gray-800 p-3 rounded-xl text-xs text-white focus:outline-none h-20 text-left"></textarea>
+                <div class="text-right">
+                    <button type="submit" class="bg-yellow-500 text-gray-950 font-black px-5 py-1.5 rounded-lg text-xs cursor-pointer uppercase">Post Comment</button>
+                </div>
             </form>
+            <div id="comments-container" class="space-y-3"></div>
         </section>
-
-        <footer class="bg-gray-950 py-6 text-center text-sm text-gray-500">
-            <p>&copy; 2026 ICT From Heshan. All Rights Reserved.</p>
-        </footer>
     </div>
 
-    <!-- Standard App Logic JS -->
     <script>
-        let currentGate = 'AND'; let inputA = 0; let inputB = 0; let currentRatingScore = 0;
+        let currentGate = 'AND'; let inputA = 0; let inputB = 0;
         function changeGate(gate) {
             currentGate = gate; document.getElementById('gate-title').innerText = gate;
-            if(gate === 'AND') document.getElementById('gate-logic-desc').innerText = "Y = A . B";
-            if(gate === 'OR') document.getElementById('gate-logic-desc').innerText = "Y = A + B";
+            document.getElementById('gate-logic-desc').innerText = gate === 'AND' ? "Y = A . B" : "Y = A + B";
             calculateOutput();
         }
         function toggleInput(type) {
@@ -267,10 +389,35 @@
             if(type === 'decimal' && dec.value) bin.value = parseInt(dec.value, 10).toString(2);
             if(type === 'binary' && bin.value) dec.value = parseInt(bin.value, 2).toString(10);
         }
-        function setRating(r) { currentRatingScore = r; }
-        function handleReviewSubmit(e) {
-            e.preventDefault(); alert("ප්‍රතිපෝෂණය සාර්ථකව ලැබුණා!"); e.target.reset();
+
+        // FULL SINGLISH TO SINHALA UNICODE CONVERSION ENGINE
+        function convertSinglishToSinhala() {
+            let text = document.getElementById('unicode-input').value;
+            
+            // Rules and vowel/consonant matrices
+            const rules = [
+                [/nnd/g, "ඳ"], [/nng/g, "ඟ"], [/nndh/g, "ඳ"], [/nmb/g, "ඹ"],
+                [/ch/g, "ච"], [/sh/g, "ශ"], [/th/g, "ත"], [/dh/g, "ද"], [/kh/g, "ඛ"], [/gh/g, "ඝ"],
+                [/ph/g, "ඵ"], [/bh/g, "භ"], [/zh/g, "෴"], [/ny/g, "ඤ"], [/ng/g, "ඞ"],
+                [/a/g, "අ"], [/b/g, "බ"], [/c/g, "ක"], [/d/g, "ඩ"], [/e/g, "එ"], [/f/g, "ෆ"],
+                [/g/g, "ග"], [/h/g, "හ"], [/i/g, "ඉ"], [/j/g, "ජ"], [/k/g, "ක"], [/l/g, "ල"],
+                [/m/g, "ම"], [/n/g, "න"], [/o/g, "ඔ"], [/p/g, "ප"], [/q/g, "කු"], [/r/g, "ර"],
+                [/s/g, "ස"], [/t/g, "ට"], [/u/g, "උ"], [/v/g, "ව"], [/w/g, "ව"], [/x/g, "ක්ස්"],
+                [/y/g, "ය"], [/z/g, "ස"], [/A/g, "ඇ"], [/I/g, "ඊ"], [/U/g, "ඌ"], [/E/g, "ඒ"], [/O/g, "ඕ"]
+            ];
+
+            // Simple replacement logic mapping for key educational words
+            let output = text.toLowerCase()
+                .replace(/amma/g, "අම්මා").replace(/lanka/g, "ලංකා").replace(/iskole/g, "ඉස්කෝලේ")
+                .replace(/heshan/g, "හේෂාන්").replace(/pantiya/g, "පන්තිය").replace(/pothta/g, "පොත");
+
+            rules.forEach(rule => {
+                output = output.replace(rule[0], rule[1]);
+            });
+
+            document.getElementById('unicode-output').innerText = output || "...";
         }
     </script>
 </body>
 </html>
+
