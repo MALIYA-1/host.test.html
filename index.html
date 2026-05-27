@@ -9,7 +9,7 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendEmailVerification, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, addDoc, onSnapshot, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
@@ -31,13 +31,14 @@
 
         const ADMIN_EMAIL = "shanshan011t@gmail.com"; //
 
-        // 1. SIGN UP SYSTEM (හිර නොවන ක්‍රමවේදය)
+        // 1. SIGN UP WITH A/L YEAR & EMAIL VERIFICATION
         window.handleSignUp = function(event) {
             event.preventDefault();
             
             const name = document.getElementById('signup-name').value;
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
+            const alYear = document.getElementById('signup-al-year').value;
             const institute = document.getElementById('signup-institute').value;
             const paymentMethod = document.getElementById('signup-payment').value;
             const slipFile = document.getElementById('signup-slip').files[0];
@@ -46,29 +47,26 @@
             submitBtn.innerText = "Processing Please Wait...";
             submitBtn.disabled = true;
 
-            // Firebase Authentication හරහා ගිණුම සෑදීම
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
                     
                     updateProfile(user, { displayName: name }).then(() => {
-                        
-                        // Slip එකක් අප්ලෝඩ් කර ඇත්නම් පමණක් Storage එකට යැවීම
+                        // Slip එකක් ඇතුළත් කර ඇත්නම් පමණක් Storage එකට යැවීම
                         if (slipFile && paymentMethod !== "Free/Scholarship") {
-                            const slipRef = ref(storage, `slips/${user.uid}_${slipFile.name}`);
+                            const slipRef = ref(storage, `slips/${user.uid}_${Date.now()}_${slipFile.name}`);
                             uploadBytes(slipRef, slipFile)
                                 .then((snapshot) => {
                                     getDownloadURL(snapshot.ref).then((downloadURL) => {
-                                        saveStudentData(user, name, email, institute, paymentMethod, downloadURL, submitBtn);
+                                        saveStudentData(user, name, email, alYear, institute, paymentMethod, downloadURL, submitBtn);
                                     });
                                 })
                                 .catch((err) => {
-                                    // Storage එක වැඩ නොකළත් හිර නොවී දත්ත ටික Save කිරීමට සකස් කර ඇත
                                     console.error("Storage Error: ", err);
-                                    saveStudentData(user, name, email, institute, paymentMethod, "Slip uploaded (URL protected/error)", submitBtn);
+                                    saveStudentData(user, name, email, alYear, institute, paymentMethod, "Slip Link Protected/Error", submitBtn);
                                 });
                         } else {
-                            saveStudentData(user, name, email, institute, paymentMethod, "No Slip (Scholarship)", submitBtn);
+                            saveStudentData(user, name, email, alYear, institute, paymentMethod, "No Slip (Scholarship)", submitBtn);
                         }
                     });
                 })
@@ -79,12 +77,13 @@
                 });
         }
 
-        // දත්ත Firestore Database හි සුරැකීම
-        function saveStudentData(user, name, email, institute, paymentMethod, slipURL, submitBtn) {
+        // දත්ත Firestore Database එකේ සුරැකීම
+        function saveStudentData(user, name, email, alYear, institute, paymentMethod, slipURL, submitBtn) {
             setDoc(doc(db, "students", user.uid), {
                 uid: user.uid,
                 name: name,
                 email: email,
+                alYear: alYear,
                 institute: institute,
                 paymentMethod: paymentMethod,
                 slipURL: slipURL,
@@ -94,12 +93,11 @@
             .then(() => {
                 sendEmailVerification(user)
                     .then(() => {
-                        // Formspree ඊමේල් පණිවිඩය යැවීම
-                        sendEmailNotification("New Student Registration Request", name, email, institute, paymentMethod, slipURL);
+                        // Formspree මගින් සර්ට විස්තර එවීම
+                        sendEmailNotification("New Student Registration Request", name, email, alYear, institute, paymentMethod, slipURL);
                         
-                        alert("ලියාපදිංචිය සාර්ථකයි! ඔබගේ " + email + " ලිපිනයට ලැබුණු Verification ලින්ක් එක ක්ලික් කර ගිණුම සක්‍රීය කර නැවත ලොග් වන්න.");
+                        alert("ලියාපදිංචිය සාර්ථකයි! කරුණාකර " + email + " ලිපිනයට ලැබුණු Verification ලින්ක් එක ක්ලික් කර ගිණුම සක්‍රීය කර ලොග් වන්න.");
                         
-                        // බටන් එක Reset කිරීම සහ Login Box එකට මාරු කිරීම
                         submitBtn.innerText = "Register & Request Verification";
                         submitBtn.disabled = false;
                         signOut(auth).then(() => { toggleAuthMode('login'); });
@@ -111,13 +109,32 @@
                     });
             })
             .catch((error) => {
-                alert("Database Error: පද්ධතියේ දත්ත සුරැකීමට නොහැකි විය. ඔබගේ Firestore Rules පරීක්ෂා කරන්න! -> " + error.message);
+                alert("Database Error: " + error.message);
                 submitBtn.innerText = "Register & Request Verification";
                 submitBtn.disabled = false;
             });
         }
 
-        // 2. LOGIN (Strict Verification Check)
+        // 2. PASSWORD RESET SYSTEM (මුරපදය අමතක නම් සකස් කිරීම)
+        window.handleForgotPassword = function() {
+            const email = document.getElementById('login-email').value;
+            if (!email) {
+                alert("කරුණාකර මුලින්ම ඉහත Email Address එක ඇතුළත් කර 'Forgot Password' ඔබන්න.");
+                return;
+            }
+
+            if(confirm("මුරපදය වෙනස් කිරීමේ (Password Reset) ලින්ක් එකක් " + email + " ලිපිනයට යැවීමට අවශ්‍යද?")) {
+                sendPasswordResetEmail(auth, email)
+                    .then(() => {
+                        alert("මුරපදය වෙනස් කිරීමේ ලින්ක් එක සාර්ථකව ඔබගේ ඊමේල් ලිපිනයට යවන ලදි. කරුණාකර Inbox/Spam පරීක්ෂා කරන්න.");
+                    })
+                    .catch((error) => {
+                        alert("Reset ලින්ක් එක යැවීමට නොහැකි විය: " + error.message);
+                    });
+            }
+        }
+
+        // 3. LOGIN WITH STRICT VERIFICATION
         window.handleLogin = function(event) {
             event.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -135,7 +152,7 @@
                     }
                 })
                 .catch((error) => {
-                    alert("ඊමේල් හෝ මුරපදය වැරදියි, නැතහොත් ඔබ තවමත් ලියාපදිංචි වී නොමැත!");
+                    alert("ඊමේල් හෝ මුරපදය වැරදියි, නැතහොත් ඔබ මෙතෙක් ලියාපදිංචි වී නොමැත!");
                 });
         }
 
@@ -143,7 +160,7 @@
             signOut(auth).then(() => { location.reload(); });
         }
 
-        // Session පාලනය
+        // User Session පරීක්ෂාව
         onAuthStateChanged(auth, (user) => {
             const signupGate = document.getElementById('auth-gate');
             const mainContent = document.getElementById('main-content');
@@ -168,7 +185,7 @@
             }
         });
 
-        // 3. LIVE COMMENTS SYSTEM
+        // 4. LIVE COMMENTS SYSTEM WITH DELETE ACCESS
         window.submitComment = function(event) {
             event.preventDefault();
             const commentTxt = document.getElementById('comment-text').value;
@@ -183,8 +200,6 @@
                     dateString: new Date().toLocaleString()
                 }).then(() => {
                     document.getElementById('comment-form').reset();
-                }).catch((err) => {
-                    alert("Comment සේව් කිරීමට නොහැකි විය: " + err.message);
                 });
             }
         }
@@ -228,8 +243,8 @@
             }
         }
 
-        // Formspree ඊමේල් පද්ධතිය
-        function sendEmailNotification(type, name, email, institute, payment, slipURL) {
+        // Notification System
+        function sendEmailNotification(type, name, email, alYear, institute, payment, slipURL) {
             fetch("https://formspree.io/f/mzdwyajk", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -237,12 +252,13 @@
                     Subject: type,
                     Student_Name: name,
                     Student_Email: email,
+                    AL_Year: alYear,
                     Institute: institute,
                     Payment_Method: payment,
-                    Slip_Attachment_URL: slipURL,
+                    Slip_URL: slipURL,
                     Time: new Date().toLocaleString()
                 })
-            }).catch(err => console.log("Notification Email failed but flow continuous."));
+            }).catch(err => console.log("Email Notification skipped."));
         }
 
         window.toggleAuthMode = function(mode) {
@@ -274,6 +290,9 @@
                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Password</label>
                     <input type="password" id="login-password" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500 text-sm">
                 </div>
+                <div class="text-right">
+                    <span onclick="handleForgotPassword()" class="text-2xs text-amber-500 hover:underline cursor-pointer font-bold">Forgot Password? (මුරපදය අමතකයි)</span>
+                </div>
                 <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold py-2.5 rounded-lg cursor-pointer text-sm">Log In</button>
             </form>
             <p class="text-xs text-center text-gray-400 mt-4">නව ශිෂ්‍යයෙක්ද? <span onclick="toggleAuthMode('signup')" class="text-cyan-400 font-bold cursor-pointer hover:underline">ලියාපදිංචි වන්න</span></p>
@@ -295,6 +314,14 @@
                 <div>
                     <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Password</label>
                     <input type="password" id="signup-password" required minlength="6" placeholder="අවම අකුරු 6ක්" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">A/L Year (විභාග වර්ෂය)</label>
+                    <select id="signup-al-year" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
+                        <option value="2026">2026 A/L</option>
+                        <option value="2027">2027 A/L</option>
+                        <option value="2028">2028 A/L</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Select Institute</label>
@@ -429,4 +456,3 @@
     </script>
 </body>
 </html>
-
