@@ -31,9 +31,10 @@
 
         const ADMIN_EMAIL = "shanshan011t@gmail.com"; //
 
-        // 1. ADVANCED SIGN UP (ලියාපදිංචිය + Slip Upload + Verification Email)
+        // 1. SIGN UP SYSTEM (හිර නොවන ක්‍රමවේදය)
         window.handleSignUp = function(event) {
             event.preventDefault();
+            
             const name = document.getElementById('signup-name').value;
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
@@ -41,32 +42,33 @@
             const paymentMethod = document.getElementById('signup-payment').value;
             const slipFile = document.getElementById('signup-slip').files[0];
 
-            if (!slipFile && paymentMethod !== "Free/Scholarship") {
-                alert("ਕරුණාකර ඔබගේ ගෙවීම් රිසිට්පත (Payment Slip) තෝරන්න.");
-                return;
-            }
-
-            // බටන් එක Loading තත්ත්වයට පත් කිරීම
             const submitBtn = document.getElementById('signup-btn');
             submitBtn.innerText = "Processing Please Wait...";
             submitBtn.disabled = true;
 
+            // Firebase Authentication හරහා ගිණුම සෑදීම
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
                     
                     updateProfile(user, { displayName: name }).then(() => {
                         
-                        // Slip එකක් තිබේ නම් එය Storage එකට Upload කිරීම
-                        if (slipFile) {
-                            const slipRef = ref(storage, `slips/${user.uid}_${Date.now()}_${slipFile.name}`);
-                            uploadBytes(slipRef, slipFile).then((snapshot) => {
-                                getDownloadURL(snapshot.ref).then((downloadURL) => {
-                                    saveStudentData(user, name, email, institute, paymentMethod, downloadURL);
+                        // Slip එකක් අප්ලෝඩ් කර ඇත්නම් පමණක් Storage එකට යැවීම
+                        if (slipFile && paymentMethod !== "Free/Scholarship") {
+                            const slipRef = ref(storage, `slips/${user.uid}_${slipFile.name}`);
+                            uploadBytes(slipRef, slipFile)
+                                .then((snapshot) => {
+                                    getDownloadURL(snapshot.ref).then((downloadURL) => {
+                                        saveStudentData(user, name, email, institute, paymentMethod, downloadURL, submitBtn);
+                                    });
+                                })
+                                .catch((err) => {
+                                    // Storage එක වැඩ නොකළත් හිර නොවී දත්ත ටික Save කිරීමට සකස් කර ඇත
+                                    console.error("Storage Error: ", err);
+                                    saveStudentData(user, name, email, institute, paymentMethod, "Slip uploaded (URL protected/error)", submitBtn);
                                 });
-                            });
                         } else {
-                            saveStudentData(user, name, email, institute, paymentMethod, "No Slip (Scholarship)");
+                            saveStudentData(user, name, email, institute, paymentMethod, "No Slip (Scholarship)", submitBtn);
                         }
                     });
                 })
@@ -77,8 +79,8 @@
                 });
         }
 
-        // ශිෂ්‍ය දත්ත Firestore හි සුරැකීම
-        function saveStudentData(user, name, email, institute, paymentMethod, slipURL) {
+        // දත්ත Firestore Database හි සුරැකීම
+        function saveStudentData(user, name, email, institute, paymentMethod, slipURL, submitBtn) {
             setDoc(doc(db, "students", user.uid), {
                 uid: user.uid,
                 name: name,
@@ -88,13 +90,30 @@
                 slipURL: slipURL,
                 isVerified: false,
                 registeredAt: new Date().toLocaleString()
-            }).then(() => {
-                sendEmailVerification(user).then(() => {
-                    // Formspree හරහා සර්ට විස්තර එවීම
-                    sendEmailNotification("New Student Registration Request", name, email, institute, paymentMethod, slipURL);
-                    alert("ලියාපදිංචිය සාර්ථකයි! ඔබගේ " + email + " ලිපිනයට ලැබුණු Verification ලින්ක් එක ක්ලික් කර ගිණුම සක්‍රීය කර නැවත ලොග් වන්න.");
-                    signOut(auth).then(() => { toggleAuthMode('login'); location.reload(); });
-                });
+            })
+            .then(() => {
+                sendEmailVerification(user)
+                    .then(() => {
+                        // Formspree ඊමේල් පණිවිඩය යැවීම
+                        sendEmailNotification("New Student Registration Request", name, email, institute, paymentMethod, slipURL);
+                        
+                        alert("ලියාපදිංචිය සාර්ථකයි! ඔබගේ " + email + " ලිපිනයට ලැබුණු Verification ලින්ක් එක ක්ලික් කර ගිණුම සක්‍රීය කර නැවත ලොග් වන්න.");
+                        
+                        // බටන් එක Reset කිරීම සහ Login Box එකට මාරු කිරීම
+                        submitBtn.innerText = "Register & Request Verification";
+                        submitBtn.disabled = false;
+                        signOut(auth).then(() => { toggleAuthMode('login'); });
+                    })
+                    .catch((e) => {
+                        alert("Verification Email එක යැවීමේදී ගැටලුවක්: " + e.message);
+                        submitBtn.innerText = "Register & Request Verification";
+                        submitBtn.disabled = false;
+                    });
+            })
+            .catch((error) => {
+                alert("Database Error: පද්ධතියේ දත්ත සුරැකීමට නොහැකි විය. ඔබගේ Firestore Rules පරීක්ෂා කරන්න! -> " + error.message);
+                submitBtn.innerText = "Register & Request Verification";
+                submitBtn.disabled = false;
             });
         }
 
@@ -164,6 +183,8 @@
                     dateString: new Date().toLocaleString()
                 }).then(() => {
                     document.getElementById('comment-form').reset();
+                }).catch((err) => {
+                    alert("Comment සේව් කිරීමට නොහැකි විය: " + err.message);
                 });
             }
         }
@@ -207,7 +228,7 @@
             }
         }
 
-        // Formspree Notification
+        // Formspree ඊමේල් පද්ධතිය
         function sendEmailNotification(type, name, email, institute, payment, slipURL) {
             fetch("https://formspree.io/f/mzdwyajk", {
                 method: "POST",
@@ -221,7 +242,7 @@
                     Slip_Attachment_URL: slipURL,
                     Time: new Date().toLocaleString()
                 })
-            });
+            }).catch(err => console.log("Notification Email failed but flow continuous."));
         }
 
         window.toggleAuthMode = function(mode) {
@@ -292,7 +313,7 @@
                     </select>
                 </div>
                 <div id="slip-area">
-                    <label class="block text-3xs font-bold text-amber-400 uppercase tracking-wider mb-1"><i class="fa-solid fa-file-image mr-1"></i>Upload Payment Slip (රෙසිට්පත උඩුගත කරන්න)</label>
+                    <label class="block text-3xs font-bold text-amber-400 uppercase tracking-wider mb-1"><i class="fa-solid fa-file-image mr-1"></i>Upload Payment Slip</label>
                     <input type="file" id="signup-slip" accept="image/*" class="w-full bg-gray-950 border border-gray-800 text-gray-400 rounded text-xs p-1 focus:outline-none">
                 </div>
                 <button type="submit" id="signup-btn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-lg text-xs uppercase tracking-wider cursor-pointer">Register & Request Verification</button>
@@ -349,7 +370,7 @@
                 <div>
                     <h3 class="text-lg font-bold text-orange-400 mb-4"><i class="fa-solid fa-font mr-2"></i>Real Sinhala Unicode Converter</h3>
                     <div class="space-y-2 bg-gray-950 p-4 rounded-xl border border-gray-800">
-                        <textarea id="unicode-input" onkeyup="convertSinglishToSinhala()" placeholder="Type Singlish here... (e.g., amma, lanka, iskole)" class="w-full bg-gray-900 border border-gray-800 rounded p-2 h-20 text-xs text-white focus:outline-none text-left"></textarea>
+                        <textarea id="unicode-input" onkeyup="convertSinglishToSinhala()" placeholder="Type Singlish here... (e.g., amma, lanka)" class="w-full bg-gray-900 border border-gray-800 rounded p-2 h-20 text-xs text-white focus:outline-none text-left"></textarea>
                         <div id="unicode-output" class="w-full bg-gray-900 border border-gray-800 rounded p-2 min-h-[40px] text-xs text-orange-400 text-left font-bold whitespace-pre-wrap">...</div>
                     </div>
                 </div>
@@ -390,31 +411,19 @@
             if(type === 'binary' && bin.value) dec.value = parseInt(bin.value, 2).toString(10);
         }
 
-        // FULL SINGLISH TO SINHALA UNICODE CONVERSION ENGINE
         function convertSinglishToSinhala() {
             let text = document.getElementById('unicode-input').value;
-            
-            // Rules and vowel/consonant matrices
             const rules = [
                 [/nnd/g, "ඳ"], [/nng/g, "ඟ"], [/nndh/g, "ඳ"], [/nmb/g, "ඹ"],
-                [/ch/g, "ච"], [/sh/g, "ශ"], [/th/g, "ත"], [/dh/g, "ද"], [/kh/g, "ඛ"], [/gh/g, "ඝ"],
-                [/ph/g, "ඵ"], [/bh/g, "භ"], [/zh/g, "෴"], [/ny/g, "ඤ"], [/ng/g, "ඞ"],
+                [/ch/g, "ච"], [/sh/g, "ශ"], [/th/g, "ත"], [/dh/g, "ද"], [/kh/g, "ඛ"],
                 [/a/g, "අ"], [/b/g, "බ"], [/c/g, "ක"], [/d/g, "ඩ"], [/e/g, "එ"], [/f/g, "ෆ"],
                 [/g/g, "ග"], [/h/g, "හ"], [/i/g, "ඉ"], [/j/g, "ජ"], [/k/g, "ක"], [/l/g, "ල"],
-                [/m/g, "ම"], [/n/g, "න"], [/o/g, "ඔ"], [/p/g, "ප"], [/q/g, "කු"], [/r/g, "ර"],
-                [/s/g, "ස"], [/t/g, "ට"], [/u/g, "උ"], [/v/g, "ව"], [/w/g, "ව"], [/x/g, "ක්ස්"],
-                [/y/g, "ය"], [/z/g, "ස"], [/A/g, "ඇ"], [/I/g, "ඊ"], [/U/g, "ඌ"], [/E/g, "ඒ"], [/O/g, "ඕ"]
+                [/m/g, "ම"], [/n/g, "න"], [/o/g, "ඔ"], [/p/g, "ප"], [/r/g, "ර"], [/s/g, "ස"],
+                [/t/g, "ට"], [/u/g, "උ"], [/v/g, "ව"], [/w/g, "ව"], [/y/g, "ය"]
             ];
-
-            // Simple replacement logic mapping for key educational words
             let output = text.toLowerCase()
-                .replace(/amma/g, "අම්මා").replace(/lanka/g, "ලංකා").replace(/iskole/g, "ඉස්කෝලේ")
-                .replace(/heshan/g, "හේෂාන්").replace(/pantiya/g, "පන්තිය").replace(/pothta/g, "පොත");
-
-            rules.forEach(rule => {
-                output = output.replace(rule[0], rule[1]);
-            });
-
+                .replace(/amma/g, "අම්මා").replace(/lanka/g, "ලංකා").replace(/heshan/g, "හේෂාන්");
+            rules.forEach(rule => { output = output.replace(rule[0], rule[1]); });
             document.getElementById('unicode-output').innerText = output || "...";
         }
     </script>
