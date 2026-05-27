@@ -20,7 +20,7 @@
             
             <form id="gate-signup-form" onsubmit="handleInitialSignup(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">ඔබගේ ආයතනික හැදුනුම්පත් අංකය (Student ID)</label>
+                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">ඔබේ සම්පූර්ණ නම (Full Name)</label>
                     <input type="text" id="gate-name" required placeholder="Ex: Kamal Perera" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 text-sm">
                 </div>
 
@@ -96,6 +96,7 @@
                 </p>
                 <div class="mt-10 flex justify-center space-x-4">
                     <a href="#simulator" class="bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold px-6 py-3 rounded-lg shadow-lg shadow-cyan-500/20 transition transform hover:-translate-y-0.5">Try Free Simulator</a>
+                    <a href="#number-converter" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition">Number Converter</a>
                     <a href="#unicode-section" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition">Unicode System</a>
                 </div>
             </div>
@@ -150,7 +151,57 @@
             </div>
         </section>
 
-        <section id="unicode-section" class="py-16 px-4 sm:px-6 lg:px-8 border-t border-gray-800 bg-gray-900">
+        <!-- ================= START SECTION: NUMBER SYSTEM CONVERTER ================= -->
+        <section id="number-converter" class="py-16 px-4 sm:px-6 lg:px-8 border-t border-gray-800 bg-gray-900">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-10">
+                    <span class="bg-emerald-950 text-emerald-400 border border-emerald-700 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Live Inter-Conversion Engine</span>
+                    <h2 class="text-3xl font-bold text-emerald-400 mt-3"><i class="fa-solid fa-calculator mr-2"></i>All-in-One Number System Converter</h2>
+                    <p class="text-gray-400 mt-2">ඕනෑම සංඛ්‍යා පද්ධතියක අගයක් ඇතුළත් කළ සැණින් එය අනෙක් සියලුම පද්ධතිවලට සජීවීව පරිවර්තනය වේ.</p>
+                </div>
+
+                <div class="bg-gray-950 rounded-2xl border border-gray-800 p-6 md:p-8 shadow-2xl space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Decimal Input -->
+                        <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 focus-within:border-emerald-500 transition">
+                            <label class="block text-xs font-bold uppercase text-emerald-400 tracking-wider mb-2">Decimal (දශමය - Base 10)</label>
+                            <input type="text" id="num-decimal" oninput="convertFrom('decimal')" placeholder="Ex: 25" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none text-lg font-mono">
+                            <span id="err-decimal" class="text-2xs text-red-500 mt-1 hidden block">වලංගු දශමය සංඛ්‍යාවක් ඇතුළත් කරන්න (0-9).</span>
+                        </div>
+
+                        <!-- Binary Input -->
+                        <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 focus-within:border-emerald-500 transition">
+                            <label class="block text-xs font-bold uppercase text-emerald-400 tracking-wider mb-2">Binary (ද්විමය - Base 2)</label>
+                            <input type="text" id="num-binary" oninput="convertFrom('binary')" placeholder="Ex: 11001" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none text-lg font-mono">
+                            <span id="err-binary" class="text-2xs text-red-500 mt-1 hidden block">වලංගු ද්විමය සංඛ්‍යාවක් ඇතුළත් කරන්න (0 හෝ 1 පමණි).</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Octal Input -->
+                        <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 focus-within:border-emerald-500 transition">
+                            <label class="block text-xs font-bold uppercase text-emerald-400 tracking-wider mb-2">Octal (අෂ්ටමය - Base 8)</label>
+                            <input type="text" id="num-octal" oninput="convertFrom('octal')" placeholder="Ex: 31" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none text-lg font-mono">
+                            <span id="err-octal" class="text-2xs text-red-500 mt-1 hidden block">වලංගු අෂ්ටමය සංඛ්‍යාවක් ඇතුළත් කරන්න (0-7).</span>
+                        </div>
+
+                        <!-- Hexadecimal Input -->
+                        <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 focus-within:border-emerald-500 transition">
+                            <label class="block text-xs font-bold uppercase text-emerald-400 tracking-wider mb-2">Hexadecimal (ෂඩ් දශමය - Base 16)</label>
+                            <input type="text" id="num-hex" oninput="convertFrom('hex')" placeholder="Ex: 19" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none text-lg font-mono uppercase">
+                            <span id="err-hex" class="text-2xs text-red-500 mt-1 hidden block">වලංගු ෂඩ් දශමය සංඛ්‍යාවක් ඇතුළත් කරන්න (0-9, A-F).</span>
+                        </div>
+                    </div>
+
+                    <div class="text-center pt-2">
+                        <button onclick="clearConverter()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition cursor-pointer">Clear All Inputs</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- ================= END SECTION: NUMBER SYSTEM CONVERTER ================= -->
+
+        <section id="unicode-section" class="py-16 px-4 sm:px-6 lg:px-8 border-t border-gray-800 bg-gray-950">
             <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-10">
                     <h2 class="text-3xl font-bold text-purple-400"><i class="fa-solid fa-font mr-2"></i>Sinhala Unicode Converter System</h2>
@@ -283,7 +334,7 @@
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">ශිෂ්‍යයාගේ නම</label>
+                            <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">|ශිෂ්‍යයාගේ නම</label>
                             <input type="text" required placeholder="Name" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500">
                         </div>
                         <div>
@@ -429,6 +480,81 @@
                 outputBox.className = "w-24 h-24 bg-gray-950 rounded-xl flex items-center justify-center border-2 border-red-500 transition duration-300";
                 txtOutput.className = "text-4xl font-mono font-bold text-red-500";
             }
+        }
+
+        /* --- DYNAMIC NUMBER SYSTEM CONVERTER ENGINE --- */
+        function convertFrom(type) {
+            const decInput = document.getElementById('num-decimal');
+            const binInput = document.getElementById('num-binary');
+            const octInput = document.getElementById('num-octal');
+            const hexInput = document.getElementById('num-hex');
+
+            // Error Elements
+            const errDec = document.getElementById('err-decimal');
+            const errBin = document.getElementById('err-binary');
+            const errOct = document.getElementById('err-octal');
+            const errHex = document.getElementById('err-hex');
+
+            // Reset all validation messages
+            errDec.classList.add('hidden');
+            errBin.classList.add('hidden');
+            errOct.classList.add('hidden');
+            errHex.classList.add('hidden');
+
+            let value = "";
+            if (type === 'decimal') value = decInput.value.trim();
+            if (type === 'binary') value = binInput.value.trim();
+            if (type === 'octal') value = octInput.value.trim();
+            if (type === 'hex') value = hexInput.value.trim();
+
+            if (!value) {
+                clearConverter();
+                return;
+            }
+
+            let decimalValue;
+
+            // Input Validation and Conversion to Base 10
+            try {
+                if (type === 'decimal') {
+                    if (!/^\d+$/.test(value)) throw new Error();
+                    decimalValue = parseInt(value, 10);
+                } else if (type === 'binary') {
+                    if (!/^[01]+$/.test(value)) throw new Error();
+                    decimalValue = parseInt(value, 2);
+                } else if (type === 'octal') {
+                    if (!/^[0-7]+$/.test(value)) throw new Error();
+                    decimalValue = parseInt(value, 8);
+                } else if (type === 'hex') {
+                    if (!/^[0-9A-Fa-f]+$/.test(value)) throw new Error();
+                    decimalValue = parseInt(value, 16);
+                }
+            } catch (e) {
+                // Show specific error if regex matching fails
+                if (type === 'decimal') errDec.classList.remove('hidden');
+                if (type === 'binary') errBin.classList.remove('hidden');
+                if (type === 'octal') errOct.classList.remove('hidden');
+                if (type === 'hex') errHex.classList.remove('hidden');
+                return;
+            }
+
+            // Distribute calculated values to other input fields
+            if (type !== 'decimal') decInput.value = decimalValue.toString(10);
+            if (type !== 'binary') binInput.value = decimalValue.toString(2);
+            if (type !== 'octal') octInput.value = decimalValue.toString(8);
+            if (type !== 'hex') hexInput.value = decimalValue.toString(16).toUpperCase();
+        }
+
+        function clearConverter() {
+            document.getElementById('num-decimal').value = "";
+            document.getElementById('num-binary').value = "";
+            document.getElementById('num-octal').value = "";
+            document.getElementById('num-hex').value = "";
+            
+            document.getElementById('err-decimal').classList.add('hidden');
+            document.getElementById('err-binary').classList.add('hidden');
+            document.getElementById('err-octal').classList.add('hidden');
+            document.getElementById('err-hex').classList.add('hidden');
         }
 
         /* --- UNICODE & BINARY CONVERTER SYSTEM --- */
