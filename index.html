@@ -11,23 +11,21 @@
 
     <nav class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+            <div class="flex flex-col md:flex-row items-center justify-between py-3 md:h-16 gap-3 md:gap-0">
                 <div class="flex items-center">
                     <span class="text-2xl font-extrabold tracking-wider text-cyan-400">
                         <i class="fa-solid fa-code-branch mr-2"></i>ICT FROM HESHAN
                     </span>
                 </div>
-                <div class="hidden md:flex items-center space-x-6">
-                    <div class="flex items-baseline space-x-4">
-                        <a href="#home" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition">Home</a>
-                        <a href="#courses" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition">Courses</a>
-                        <a href="#simulator" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition text-cyan-400">Logic Simulator</a>
-                        <button onclick="toggleModal('payment-modal')" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-md text-sm font-medium transition text-white font-bold cursor-pointer"><i class="fa-solid fa-credit-card mr-1"></i> Card Pay</button>
-                        <button onclick="toggleModal('login-modal')" class="bg-cyan-600 hover:bg-cyan-500 px-3 py-2 rounded-md text-sm font-medium transition text-gray-900 font-bold cursor-pointer">LMS Portal</button>
-                    </div>
-                    <div class="border-l border-gray-700 pl-4 flex items-center text-cyan-400 font-mono font-bold text-sm">
-                        <a href="tel:+94771234567" class="hover:underline"><i class="fa-solid fa-phone mr-2 animate-bounce"></i>+94 77 123 4567</a>
-                    </div>
+                <div class="flex flex-wrap items-center justify-center gap-4 text-xs md:text-sm text-gray-300">
+                    <span class="font-bold text-white text-base border-r border-gray-700 pr-3">Heshan Jayasundara</span>
+                    <span class="bg-gray-900 px-2 py-1 rounded border border-gray-700 text-cyan-400 font-medium">Pencil Opera Kurunegala</span>
+                    <span class="bg-gray-900 px-2 py-1 rounded border border-gray-700 text-cyan-400 font-medium">Ziyon Kurunegala</span>
+                    <span class="bg-gray-900 px-2 py-1 rounded border border-gray-700 text-cyan-400 font-medium">Sipwin Kurunegala</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="toggleModal('payment-modal')" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-md text-xs font-bold transition text-white cursor-pointer"><i class="fa-solid fa-credit-card mr-1"></i> Pay Fees</button>
+                    <button onclick="toggleModal('login-modal')" class="bg-cyan-600 hover:bg-cyan-500 px-3 py-1.5 rounded-md text-xs font-bold transition text-gray-900 cursor-pointer">LMS Login</button>
                 </div>
             </div>
         </div>
@@ -45,7 +43,7 @@
             </p>
             <div class="mt-10 flex justify-center space-x-4">
                 <a href="#simulator" class="bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold px-6 py-3 rounded-lg shadow-lg shadow-cyan-500/20 transition transform hover:-translate-y-0.5">Try Free Simulator</a>
-                <button onclick="toggleModal('payment-modal')" class="bg-emerald-500 hover:bg-emerald-400 text-gray-900 font-bold px-6 py-3 rounded-lg shadow-lg transition">Pay Fees Online</button>
+                <a href="#unicode-section" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition">Unicode System</a>
             </div>
         </div>
     </section>
@@ -59,12 +57,12 @@
 
             <div class="bg-gray-900 rounded-2xl border border-gray-800 p-6 md:p-8 shadow-2xl">
                 <div class="flex flex-wrap gap-2 justify-center mb-8 border-b border-gray-800 pb-6">
-                    <button onclick="changeGate('AND')" id="btn-AND" class="gate-btn bg-cyan-600 text-gray-900 font-bold px-4 py-2 rounded-lg transition">AND Gate</button>
-                    <button onclick="changeGate('OR')" id="btn-OR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">OR Gate</button>
-                    <button onclick="changeGate('NOT')" id="btn-NOT" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">NOT Gate</button>
-                    <button onclick="changeGate('NAND')" id="btn-NAND" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">NAND Gate</button>
-                    <button onclick="changeGate('NOR')" id="btn-NOR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">NOR Gate</button>
-                    <button onclick="changeGate('XOR')" id="btn-XOR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">XOR Gate</button>
+                    <button onclick="changeGate('AND')" id="btn-AND" class="gate-btn bg-cyan-600 text-gray-900 font-bold px-4 py-2 rounded-lg transition cursor-pointer">AND Gate</button>
+                    <button onclick="changeGate('OR')" id="btn-OR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">OR Gate</button>
+                    <button onclick="changeGate('NOT')" id="btn-NOT" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">NOT Gate</button>
+                    <button onclick="changeGate('NAND')" id="btn-NAND" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">NAND Gate</button>
+                    <button onclick="changeGate('NOR')" id="btn-NOR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">NOR Gate</button>
+                    <button onclick="changeGate('XOR')" id="btn-XOR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">XOR Gate</button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center justify-center p-6 bg-gray-950 rounded-xl border border-gray-800">
@@ -93,6 +91,32 @@
                             <span id="txt-output" class="text-4xl font-mono font-bold text-red-500">0</span>
                         </div>
                         <span id="gate-logic-desc" class="text-xs text-gray-400 text-center mt-2 font-mono">Y = A . B</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="unicode-section" class="py-16 px-4 sm:px-6 lg:px-8 border-t border-gray-800 bg-gray-900">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-purple-400"><i class="fa-solid fa-font mr-2"></i>Sinhala Unicode Converter System</h2>
+                <p class="text-gray-400 mt-2">සිංහල අකුරු ටයිප් කර එහි Unicode අගයන් සහ ද්විමය (Binary) පරිවර්තන පද්ධතිය සජීවීව බලාගන්න.</p>
+            </div>
+
+            <div class="bg-gray-950 rounded-2xl border border-gray-800 p-6 md:p-8 shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Input Sinhala Text</label>
+                    <textarea id="unicode-input" oninput="processUnicode()" class="w-full h-40 bg-gray-900 border border-gray-800 rounded-lg p-4 text-white focus:outline-none focus:border-purple-500" placeholder="මෙතන සිංහලෙන් ටයිප් කරන්න... (उदा: අ, ක, ict)"></textarea>
+                </div>
+                <div class="flex flex-col justify-between space-y-4">
+                    <div class="bg-gray-900 p-4 rounded-lg border border-gray-800">
+                        <span class="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-1">Character Code (UTF-16 / Hex)</span>
+                        <div id="unicode-hex" class="font-mono text-xl text-purple-400 font-bold">-</div>
+                    </div>
+                    <div class="bg-gray-900 p-4 rounded-lg border border-gray-800 h-full overflow-y-auto">
+                        <span class="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-1">Binary Stream (ගණන් හැදීමට)</span>
+                        <div id="unicode-binary" class="font-mono text-xs text-emerald-400 break-all leading-relaxed">-</div>
                     </div>
                 </div>
             </div>
@@ -133,6 +157,26 @@
         </div>
     </section>
 
+    <section class="py-16 border-t border-gray-800 bg-gray-950 px-4">
+        <div class="max-w-2xl mx-auto text-center">
+            <h2 class="text-3xl font-bold text-yellow-500 mb-2"><i class="fa-solid fa-star mr-2"></i>Rate Our Platform</h2>
+            <p class="text-gray-400 mb-6">පද්ධතිය පිළිබඳ ඔබගේ වටිනා අදහස් සහ තරු සලකුණු ලබා දෙන්න.</p>
+            
+            <div class="flex justify-center space-x-2 text-3xl mb-6 text-gray-600">
+                <i onclick="setRating(1)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
+                <i onclick="setRating(2)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
+                <i onclick="setRating(3)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
+                <i onclick="setRating(4)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
+                <i onclick="setRating(5)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
+            </div>
+
+            <form onsubmit="event.preventDefault(); alert('ඔබගේ ප්‍රතිපෝෂණයට ස්තූතියි, සර්!'); this.reset(); setRating(0);" class="space-y-4">
+                <textarea required placeholder="ඔබේ අදහස් මෙතන ලියන්න (Comment)..." class="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl text-white focus:outline-none focus:border-yellow-500"></textarea>
+                <button type="submit" class="bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-gray-950 font-black px-8 py-2.5 rounded-lg shadow-lg transition tracking-wide cursor-pointer uppercase text-xs">Submit Review</button>
+            </form>
+        </div>
+    </section>
+
     <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
             <button onclick="toggleModal('login-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
@@ -157,46 +201,72 @@
     <div id="payment-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
             <button onclick="toggleModal('payment-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-            <div class="text-center mb-6">
+            <div class="text-center mb-4">
                 <h3 class="text-2xl font-bold text-emerald-400"><i class="fa-solid fa-shield-halved mr-2"></i>Secure Card Payment</h3>
-                <p class="text-gray-400 text-sm mt-1">Visa, Master හෝ ඩිජිටල් කාඩ්පත් මඟින් සුරක්ෂිතව පන්ති ගාස්තු ගෙවන්න.</p>
+                <p class="text-gray-400 text-sm mt-1">ආයතනික සහ පන්ති තොරතුරු නිවැරදිව තෝරා ගෙවීම් කරන්න.</p>
             </div>
-            <form onsubmit="event.preventDefault(); alert('ගෙවීම් සාර්ථකයි! සර්ගේ Payment Gateway එක සමඟ සම්බන්ධ විය.'); toggleModal('payment-modal');" class="space-y-4">
+            <form onsubmit="event.preventDefault(); alert('ගෙවීම් සාර්ථකයි! විස්තර පද්ධතියට ඇතුළත් විය.'); toggleModal('payment-modal');" class="space-y-3">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">පන්ති යන ආයතනය</label>
+                        <select required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 bg-gray-900">
+                            <option value="">තෝරන්න...</option>
+                            <option>Pencil Opera Kurunegala</option>
+                            <option>Ziyon Kurunegala</option>
+                            <option>Sipwin Kurunegala</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">A/L වර්ෂය</label>
+                        <select required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 bg-gray-900">
+                            <option value="">වර්ෂය...</option>
+                            <option>2026</option>
+                            <option>2027</option>
+                            <option>2028</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">ශිෂ්‍යයාගේ නම</label>
+                        <input type="text" required placeholder="Name" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">ආයතනික හැඳුනුම්පත් අංකය</label>
+                        <input type="text" required placeholder="Institute ID No" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono">
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">Select Course</label>
-                    <select class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 bg-gray-900">
+                    <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">පාඨමාලාව</label>
+                    <select class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 bg-gray-900">
                         <option>2027 A/L Theory — LKR 3,000</option>
                         <option>2026 A/L Revision — LKR 3,500</option>
                         <option>2026 Paper Class — LKR 2,500</option>
                     </select>
                 </div>
+
                 <div>
-                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">Student Name & ID</label>
-                    <input type="text" required placeholder="Heshan Jayasundara (ID: 4502)" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">Card Number</label>
+                    <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">Card Number</label>
                     <div class="relative">
-                        <input type="text" required placeholder="4111 2222 3333 4444" class="w-full bg-gray-950 border border-gray-800 rounded-lg pl-4 pr-10 py-2.5 text-white focus:outline-none focus:border-emerald-500 font-mono">
-                        <i class="fa-solid fa-credit-card absolute right-3 top-3.5 text-gray-500"></i>
+                        <input type="text" required placeholder="4111 2222 3333 4444" class="w-full bg-gray-950 border border-gray-800 rounded-lg pl-3 pr-10 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono">
+                        <i class="fa-solid fa-credit-card absolute right-3 top-2.5 text-gray-500 text-xs"></i>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">Expiry Date</label>
-                        <input type="text" required placeholder="MM / YY" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 font-mono">
+                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">Expiry Date</label>
+                        <input type="text" required placeholder="MM / YY" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">CVC / CVV</label>
-                        <input type="password" required placeholder="•••" maxlength="3" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 font-mono">
+                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">CVC / CVV</label>
+                        <input type="password" required placeholder="•••" maxlength="3" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono">
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-gray-900 font-black py-3 rounded-lg transition uppercase tracking-wider text-sm shadow-lg shadow-emerald-500/20 cursor-pointer mt-2">Pay via Secured Gate</button>
+                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-gray-900 font-black py-2.5 rounded-lg transition uppercase tracking-wider text-xs shadow-lg shadow-emerald-500/20 cursor-pointer mt-1">Pay via Secured Gate</button>
             </form>
-            <div class="mt-4 flex items-center justify-center space-x-4 text-xs text-gray-500">
-                <span><i class="fa-solid fa-lock mr-1"></i> 256-bit SSL Encryption</span>
-                <span><i class="fa-brands fa-cc-visa text-lg"></i> <i class="fa-brands fa-cc-mastercard text-lg"></i></span>
-            </div>
         </div>
     </div>
 
@@ -209,12 +279,12 @@
         let inputA = 0;
         let inputB = 0;
 
-        // Unified Modal Toggle function
         function toggleModal(modalId) {
             const modal = document.getElementById(modalId);
             modal.classList.toggle('hidden');
         }
 
+        /* --- LOGIC SIMULATOR ENGINE --- */
         function changeGate(gate) {
             currentGate = gate;
             document.querySelectorAll('.gate-btn').forEach(btn => {
@@ -283,6 +353,49 @@
                 outputBox.className = "w-24 h-24 bg-gray-950 rounded-xl flex items-center justify-center border-2 border-red-500 transition duration-300";
                 txtOutput.className = "text-4xl font-mono font-bold text-red-500";
             }
+        }
+
+        /* --- UNICODE & BINARY CONVERTER SYSTEM --- */
+        function processUnicode() {
+            const text = document.getElementById('unicode-input').value;
+            const hexContainer = document.getElementById('unicode-hex');
+            const binaryContainer = document.getElementById('unicode-binary');
+
+            if(!text) {
+                hexContainer.innerText = "-";
+                binaryContainer.innerText = "-";
+                return;
+            }
+
+            let hexResult = [];
+            let binaryResult = [];
+
+            for(let i = 0; i < text.length; i++) {
+                let code = text.charCodeAt(i);
+                
+                // Hex code generation
+                let hex = code.toString(16).toUpperCase();
+                hexResult.push("U+" + ("0000" + hex).slice(-4));
+
+                // Binary dynamic bit structure generation
+                let binary = code.toString(2);
+                binaryResult.push(("0000000000000000" + binary).slice(-16));
+            }
+
+            hexContainer.innerText = hexResult.join('  ');
+            binaryContainer.innerText = binaryResult.join(' ');
+        }
+
+        /* --- STAR RATING SYSTEM --- */
+        function setRating(rating) {
+            const stars = document.querySelectorAll('.star-icon');
+            stars.forEach((star, index) => {
+                if(index < rating) {
+                    star.className = "fa-solid fa-star star-icon cursor-pointer text-yellow-400 transition";
+                } else {
+                    star.className = "fa-solid fa-star star-icon cursor-pointer text-gray-600 transition";
+                }
+            });
         }
     </script>
 </body>
