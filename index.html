@@ -3,429 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT From Heshan | Premium LMS Portal</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>ICT From Heshan | Premium Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, addDoc, onSnapshot, query, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCHf-YhlMZSoLw1ll4KNfgmTPJHAvzaMjI",
-            authDomain: "ictfromheshan.firebaseapp.com",
-            projectId: "ictfromheshan",
-            storageBucket: "ictfromheshan.firebasestorage.app",
-            messagingSenderId: "899561130232",
-            appId: "1:899561130232:web:e6bc8a688779ae28b2930d",
-            measurementId: "G-ZWPF7VE06Z"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyCHf-YhlMZSoLw1ll4KNfgmTPJHAvzaMjI", authDomain: "ictfromheshan.firebaseapp.com", projectId: "ictfromheshan", storageBucket: "ictfromheshan.firebasestorage.app", appId: "1:899561130232:web:e6bc8a688779ae28b2930d" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
-        const ADMIN_EMAIL = "shanshan011t@gmail.com"; //
+        window.handleLimitedLogin = (e) => {
+            e.preventDefault();
+            const data = { name: document.getElementById('lim-name').value, institute: document.getElementById('lim-institute').value, year: document.getElementById('lim-year').value };
+            localStorage.setItem('limitedUser', JSON.stringify(data));
+            location.reload();
+        };
 
-        // 1. SIGN UP SYSTEM (හිර නොවන ක්‍රමවේදය)
-        window.handleSignUp = function(event) {
-            event.preventDefault();
-            
-            const name = document.getElementById('signup-name').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const institute = document.getElementById('signup-institute').value;
-            const paymentMethod = document.getElementById('signup-payment').value;
-            const slipFile = document.getElementById('signup-slip').files[0];
-
-            const submitBtn = document.getElementById('signup-btn');
-            submitBtn.innerText = "Processing Please Wait...";
-            submitBtn.disabled = true;
-
-            // Firebase Authentication හරහා ගිණුම සෑදීම
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    
-                    updateProfile(user, { displayName: name }).then(() => {
-                        
-                        // Slip එකක් අප්ලෝඩ් කර ඇත්නම් පමණක් Storage එකට යැවීම
-                        if (slipFile && paymentMethod !== "Free/Scholarship") {
-                            const slipRef = ref(storage, `slips/${user.uid}_${slipFile.name}`);
-                            uploadBytes(slipRef, slipFile)
-                                .then((snapshot) => {
-                                    getDownloadURL(snapshot.ref).then((downloadURL) => {
-                                        saveStudentData(user, name, email, institute, paymentMethod, downloadURL, submitBtn);
-                                    });
-                                })
-                                .catch((err) => {
-                                    // Storage එක වැඩ නොකළත් හිර නොවී දත්ත ටික Save කිරීමට සකස් කර ඇත
-                                    console.error("Storage Error: ", err);
-                                    saveStudentData(user, name, email, institute, paymentMethod, "Slip uploaded (URL protected/error)", submitBtn);
-                                });
-                        } else {
-                            saveStudentData(user, name, email, institute, paymentMethod, "No Slip (Scholarship)", submitBtn);
-                        }
-                    });
-                })
-                .catch((error) => {
-                    alert("ලියාපදිංචිය අසාර්ථකයි: " + error.message);
-                    submitBtn.innerText = "Register & Request Verification";
-                    submitBtn.disabled = false;
-                });
-        }
-
-        // දත්ත Firestore Database හි සුරැකීම
-        function saveStudentData(user, name, email, institute, paymentMethod, slipURL, submitBtn) {
-            setDoc(doc(db, "students", user.uid), {
-                uid: user.uid,
-                name: name,
-                email: email,
-                institute: institute,
-                paymentMethod: paymentMethod,
-                slipURL: slipURL,
-                isVerified: false,
-                registeredAt: new Date().toLocaleString()
-            })
-            .then(() => {
-                sendEmailVerification(user)
-                    .then(() => {
-                        // Formspree ඊමේල් පණිවිඩය යැවීම
-                        sendEmailNotification("New Student Registration Request", name, email, institute, paymentMethod, slipURL);
-                        
-                        alert("ලියාපදිංචිය සාර්ථකයි! ඔබගේ " + email + " ලිපිනයට ලැබුණු Verification ලින්ක් එක ක්ලික් කර ගිණුම සක්‍රීය කර නැවත ලොග් වන්න.");
-                        
-                        // බටන් එක Reset කිරීම සහ Login Box එකට මාරු කිරීම
-                        submitBtn.innerText = "Register & Request Verification";
-                        submitBtn.disabled = false;
-                        signOut(auth).then(() => { toggleAuthMode('login'); });
-                    })
-                    .catch((e) => {
-                        alert("Verification Email එක යැවීමේදී ගැටලුවක්: " + e.message);
-                        submitBtn.innerText = "Register & Request Verification";
-                        submitBtn.disabled = false;
-                    });
-            })
-            .catch((error) => {
-                alert("Database Error: පද්ධතියේ දත්ත සුරැකීමට නොහැකි විය. ඔබගේ Firestore Rules පරීක්ෂා කරන්න! -> " + error.message);
-                submitBtn.innerText = "Register & Request Verification";
-                submitBtn.disabled = false;
-            });
-        }
-
-        // 2. LOGIN (Strict Verification Check)
-        window.handleLogin = function(event) {
-            event.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    if (user.emailVerified) {
-                        setDoc(doc(db, "students", user.uid), { isVerified: true }, { merge: true });
-                        alert("සාර්ථකව පද්ධතියට සම්බන්ධ විය!");
-                    } else {
-                        alert("ඇතුළුවීම අසාර්ථකයි! කරුණාකර ඔබගේ ඊමේල් ලිපිනයට ලැබුණු ලින්ක් එක ක්ලික් කර එය තහවුරු (Verify) කරන්න.");
-                        signOut(auth);
-                    }
-                })
-                .catch((error) => {
-                    alert("ඊමේල් හෝ මුරපදය වැරදියි, නැතහොත් ඔබ තවමත් ලියාපදිංචි වී නොමැත!");
-                });
-        }
-
-        window.logoutUser = function() {
-            signOut(auth).then(() => { location.reload(); });
-        }
-
-        // Session පාලනය
         onAuthStateChanged(auth, (user) => {
-            const signupGate = document.getElementById('auth-gate');
-            const mainContent = document.getElementById('main-content');
-            
-            if (user && user.emailVerified) {
+            const lim = JSON.parse(localStorage.getItem('limitedUser'));
+            if(user && user.emailVerified) {
+                document.getElementById('auth-gate').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
                 document.getElementById('nav-user-name').innerText = user.displayName;
-                document.getElementById('nav-user-badge').innerText = user.email;
-                
-                if(user.email === ADMIN_EMAIL) {
-                    document.getElementById('nav-user-role').innerText = "ADMIN ACCESS";
-                    document.getElementById('nav-user-role').className = "bg-red-950 text-red-400 px-2 py-1 rounded font-bold text-2xs";
-                } else {
-                    document.getElementById('nav-user-role').innerText = "VERIFIED STUDENT";
-                }
-
-                signupGate.classList.add('hidden');
-                mainContent.classList.remove('hidden');
-                loadComments(user.email === ADMIN_EMAIL);
-            } else {
-                signupGate.classList.remove('hidden');
-                mainContent.classList.add('hidden');
+            } else if(lim) {
+                document.getElementById('auth-gate').classList.add('hidden');
+                document.getElementById('limited-content').classList.remove('hidden');
+                document.getElementById('lim-nav-name').innerText = lim.name;
             }
         });
 
-        // 3. LIVE COMMENTS SYSTEM
-        window.submitComment = function(event) {
-            event.preventDefault();
-            const commentTxt = document.getElementById('comment-text').value;
+        window.logoutUser = () => { localStorage.removeItem('limitedUser'); signOut(auth).then(() => location.reload()); };
+        
+        window.submitComment = (e) => {
+            e.preventDefault();
+            const lim = JSON.parse(localStorage.getItem('limitedUser'));
             const user = auth.currentUser;
-
-            if(user) {
-                addDoc(collection(db, "comments"), {
-                    username: user.displayName,
-                    email: user.email,
-                    text: commentTxt,
-                    timestamp: Date.now(),
-                    dateString: new Date().toLocaleString()
-                }).then(() => {
-                    document.getElementById('comment-form').reset();
-                }).catch((err) => {
-                    alert("Comment සේව් කිරීමට නොහැකි විය: " + err.message);
-                });
-            }
-        }
-
-        function loadComments(isAdmin) {
-            const q = query(collection(db, "comments"), orderBy("timestamp", "desc"));
-            onSnapshot(q, (snapshot) => {
-                const container = document.getElementById('comments-container');
-                container.innerHTML = "";
-                
-                if(snapshot.empty) {
-                    container.innerHTML = `<p class="text-gray-500 text-xs italic">තවම අදහස් කිසිවක් නොමැත.</p>`;
-                    return;
-                }
-
-                snapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    const id = docSnap.id;
-                    const deleteBtn = isAdmin ? `<button onclick="deleteComment('${id}')" class="text-red-500 hover:text-red-400 text-xs font-bold cursor-pointer"><i class="fa-solid fa-trash mr-1"></i>Delete</button>` : "";
-
-                    container.innerHTML += `
-                        <div class="bg-gray-950 border border-gray-800 p-4 rounded-xl flex justify-between items-start text-left">
-                            <div>
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-cyan-400 font-bold text-sm">${data.username}</span>
-                                    <span class="text-gray-600 text-2xs font-mono">(${data.email})</span>
-                                </div>
-                                <p class="text-gray-300 text-xs mt-1.5">${data.text}</p>
-                                <span class="text-gray-600 text-3xs block mt-1">${data.dateString}</span>
-                            </div>
-                            ${deleteBtn}
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        window.deleteComment = function(id) {
-            if(confirm("මෙම කමෙන්ට් එක මකා දැමීමට අවශ්‍යද?")) {
-                deleteDoc(doc(db, "comments", id));
-            }
-        }
-
-        // Formspree ඊමේල් පද්ධතිය
-        function sendEmailNotification(type, name, email, institute, payment, slipURL) {
-            fetch("https://formspree.io/f/mzdwyajk", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    Subject: type,
-                    Student_Name: name,
-                    Student_Email: email,
-                    Institute: institute,
-                    Payment_Method: payment,
-                    Slip_Attachment_URL: slipURL,
-                    Time: new Date().toLocaleString()
-                })
-            }).catch(err => console.log("Notification Email failed but flow continuous."));
-        }
-
-        window.toggleAuthMode = function(mode) {
-            if(mode === 'signup') {
-                document.getElementById('login-box').classList.add('hidden');
-                document.getElementById('signup-box').classList.remove('hidden');
-            } else {
-                document.getElementById('signup-box').classList.add('hidden');
-                document.getElementById('login-box').classList.remove('hidden');
-            }
-        }
+            addDoc(collection(db, "comments"), { username: lim ? lim.name : user.displayName, text: document.getElementById('comment-text').value, timestamp: Date.now(), dateString: new Date().toLocaleString() });
+            document.getElementById('comment-form').reset();
+        };
     </script>
 </head>
-<body class="bg-gray-900 text-white font-sans antialiased">
+<body class="bg-gray-900 text-white">
 
-    <div id="auth-gate" class="fixed inset-0 bg-gray-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
-        
-        <div id="login-box" class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl my-auto">
-            <div class="text-center mb-6">
-                <span class="bg-cyan-900/50 text-cyan-400 border border-cyan-700 text-2xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">LMS Portal</span>
-                <h2 class="text-2xl font-black mt-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">ICT FROM HESHAN</h2>
-            </div>
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
-                    <input type="email" id="login-email" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Password</label>
-                    <input type="password" id="login-password" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500 text-sm">
-                </div>
-                <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold py-2.5 rounded-lg cursor-pointer text-sm">Log In</button>
+    <div id="auth-gate" class="fixed inset-0 bg-gray-950 z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-900 p-6 rounded-2xl w-full max-w-sm border border-gray-800">
+            <h2 class="text-xl font-bold mb-4 text-cyan-400 text-center">LOGIN</h2>
+            <form onsubmit="handleLogin(event)" class="space-y-3">
+                <input type="email" id="login-email" placeholder="Email" class="w-full bg-gray-950 p-2 rounded text-xs">
+                <input type="password" id="login-password" placeholder="Password" class="w-full bg-gray-950 p-2 rounded text-xs">
+                <button class="w-full bg-cyan-600 py-2 rounded font-bold text-xs">LOGIN</button>
             </form>
-            <p class="text-xs text-center text-gray-400 mt-4">නව ශිෂ්‍යයෙක්ද? <span onclick="toggleAuthMode('signup')" class="text-cyan-400 font-bold cursor-pointer hover:underline">ලියාපදිංචි වන්න</span></p>
-        </div>
-
-        <div id="signup-box" class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl my-auto hidden">
-            <div class="text-center mb-4">
-                <h2 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">නව ශිෂ්‍ය ලියාපදිංචිය</h2>
+            <div class="mt-8 border-t border-gray-800 pt-6">
+                <form onsubmit="handleLimitedLogin(event)" class="space-y-3">
+                    <input type="text" id="lim-name" placeholder="Full Name" required class="w-full bg-gray-950 p-2 rounded text-xs">
+                    <input type="text" id="lim-institute" placeholder="Institute" required class="w-full bg-gray-950 p-2 rounded text-xs">
+                    <input type="text" id="lim-year" placeholder="AL Year" required class="w-full bg-gray-950 p-2 rounded text-xs">
+                    <button class="w-full bg-yellow-600 py-2 rounded font-bold text-xs">JOIN AS GUEST</button>
+                </form>
             </div>
-            <form onsubmit="handleSignUp(event)" class="space-y-3">
-                <div>
-                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Full Name</label>
-                    <input type="text" id="signup-name" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Email Address</label>
-                    <input type="email" id="signup-email" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Password</label>
-                    <input type="password" id="signup-password" required minlength="6" placeholder="අවම අකුරු 6ක්" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Select Institute</label>
-                    <select id="signup-institute" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
-                        <option value="Online">Online Class</option>
-                        <option value="Rotary - Nugegoda">Rotary - Nugegoda</option>
-                        <option value="Syzygy - Gampaha">Syzygy - Gampaha</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-3xs font-bold text-gray-400 uppercase tracking-wider mb-1">Payment Method</label>
-                    <select id="signup-payment" required onchange="if(this.value==='Free/Scholarship'){document.getElementById('slip-area').classList.add('hidden')}else{document.getElementById('slip-area').classList.remove('hidden')}" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none">
-                        <option value="Bank Transfer">Bank Transfer (බැංකු තැන්පතු)</option>
-                        <option value="Card Payment">Card / Online Payment</option>
-                        <option value="Free/Scholarship">Scholarship (නොමිලේ)</option>
-                    </select>
-                </div>
-                <div id="slip-area">
-                    <label class="block text-3xs font-bold text-amber-400 uppercase tracking-wider mb-1"><i class="fa-solid fa-file-image mr-1"></i>Upload Payment Slip</label>
-                    <input type="file" id="signup-slip" accept="image/*" class="w-full bg-gray-950 border border-gray-800 text-gray-400 rounded text-xs p-1 focus:outline-none">
-                </div>
-                <button type="submit" id="signup-btn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-lg text-xs uppercase tracking-wider cursor-pointer">Register & Request Verification</button>
-            </form>
-            <p class="text-3xs text-center text-gray-400 mt-3">දැනටමත් ගිණුමක් තිබේද? <span onclick="toggleAuthMode('login')" class="text-purple-400 font-bold cursor-pointer hover:underline">ලොග් වන්න</span></p>
         </div>
     </div>
 
     <div id="main-content" class="hidden">
-        <nav class="bg-gray-800 border-b border-gray-700 sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-                <span class="text-xl font-black text-cyan-400">ICT FROM HESHAN</span>
-                <div class="flex items-center space-x-4 text-xs">
-                    <span id="nav-user-name" class="font-bold">-</span>
-                    <span id="nav-user-badge" class="bg-gray-900 px-2 py-1 rounded text-cyan-400 font-mono">-</span>
-                    <span id="nav-user-role" class="bg-emerald-950 text-emerald-400 px-2 py-1 rounded font-bold text-2xs">VERIFIED STUDENT</span>
-                    <button onclick="logoutUser()" class="bg-red-600 hover:bg-red-500 px-3 py-1.5 rounded text-white font-bold cursor-pointer">Logout</button>
-                </div>
-            </div>
+        <nav class="bg-gray-800 p-4 flex justify-between items-center">
+            <span id="nav-user-name" class="font-bold"></span>
+            <button onclick="logoutUser()" class="bg-red-600 px-3 py-1 rounded text-xs">Logout</button>
         </nav>
-
-        <section class="py-12 px-4 bg-gray-950 border-b border-gray-800">
-            <div class="max-w-4xl mx-auto text-center mb-6">
-                <h2 class="text-2xl font-bold text-cyan-400"><i class="fa-solid fa-toggle-on mr-2"></i>Logic Gate Simulator</h2>
-            </div>
-            <div class="flex gap-2 justify-center mb-6">
-                <button onclick="changeGate('AND')" class="bg-cyan-600 text-gray-900 font-bold px-4 py-1.5 rounded text-xs cursor-pointer">AND</button>
-                <button onclick="changeGate('OR')" class="bg-gray-800 px-4 py-1.5 rounded text-xs cursor-pointer">OR</button>
-            </div>
-            <div class="max-w-md mx-auto bg-gray-900 p-6 rounded-xl border border-gray-800 grid grid-cols-3 gap-4 items-center text-center">
-                <div>
-                    <button onclick="toggleInput('A')" id="btn-inputA" class="w-full mb-2 bg-gray-950 py-1.5 rounded font-mono text-sm text-red-500 border border-red-900/30 cursor-pointer">A: 0</button>
-                    <button onclick="toggleInput('B')" id="btn-inputB" class="w-full bg-gray-950 py-1.5 rounded font-mono text-sm text-red-500 border border-red-900/30 cursor-pointer">B: 0</button>
-                </div>
-                <div>
-                    <span id="gate-title" class="text-sm font-black block">AND</span>
-                    <span id="gate-logic-desc" class="text-3xs text-gray-500 font-mono">Y = A . B</span>
-                </div>
-                <div class="p-3 bg-gray-950 border border-red-500 rounded-lg">
-                    <span id="txt-output" class="text-2xl font-mono font-bold text-red-500">0</span>
-                </div>
+        
+        <section class="p-6">
+            <h2 class="text-xl font-bold mb-4">Logic Gate Simulator</h2>
+            <div class="grid grid-cols-3 gap-4 max-w-sm mx-auto bg-gray-950 p-6 rounded-xl">
+                <button onclick="toggleInput('A')" id="btn-inputA" class="bg-gray-800 p-2 rounded">A: 0</button>
+                <span class="text-center font-bold">AND</span>
+                <div class="bg-red-900 p-2 text-center rounded">Out: <span id="txt-output">0</span></div>
             </div>
         </section>
 
-        <section class="py-12 px-4 bg-gray-900 border-b border-gray-800">
-            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <h3 class="text-lg font-bold text-emerald-400 mb-4"><i class="fa-solid fa-calculator mr-2"></i>Number Converter</h3>
-                    <div class="space-y-2 bg-gray-950 p-4 rounded-xl border border-gray-800">
-                        <input type="text" id="num-decimal" oninput="convertFrom('decimal')" placeholder="Decimal (Base 10)" class="w-full bg-gray-900 border border-gray-800 rounded p-2 text-xs text-white focus:outline-none">
-                        <input type="text" id="num-binary" oninput="convertFrom('binary')" placeholder="Binary (Base 2)" class="w-full bg-gray-900 border border-gray-800 rounded p-2 text-xs text-white focus:outline-none">
-                    </div>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold text-orange-400 mb-4"><i class="fa-solid fa-font mr-2"></i>Real Sinhala Unicode Converter</h3>
-                    <div class="space-y-2 bg-gray-950 p-4 rounded-xl border border-gray-800">
-                        <textarea id="unicode-input" onkeyup="convertSinglishToSinhala()" placeholder="Type Singlish here... (e.g., amma, lanka)" class="w-full bg-gray-900 border border-gray-800 rounded p-2 h-20 text-xs text-white focus:outline-none text-left"></textarea>
-                        <div id="unicode-output" class="w-full bg-gray-900 border border-gray-800 rounded p-2 min-h-[40px] text-xs text-orange-400 text-left font-bold whitespace-pre-wrap">...</div>
-                    </div>
-                </div>
+        <section class="p-6">
+            <h2 class="text-xl font-bold mb-4">Converters</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="num-decimal" oninput="convertFrom('decimal')" placeholder="Decimal" class="bg-gray-800 p-2 rounded">
+                <input type="text" id="num-binary" oninput="convertFrom('binary')" placeholder="Binary" class="bg-gray-800 p-2 rounded">
+                <textarea id="unicode-input" onkeyup="convertSinglishToSinhala()" placeholder="Type Singlish..." class="bg-gray-800 p-2 rounded col-span-2"></textarea>
+                <div id="unicode-output" class="bg-gray-950 p-2 rounded col-span-2 text-orange-400">...</div>
             </div>
         </section>
-
-        <section class="py-12 bg-gray-950 px-4 max-w-3xl mx-auto">
-            <h2 class="text-lg font-bold text-yellow-500 mb-4 text-left"><i class="fa-solid fa-comments mr-2"></i>Student Forum (Comments)</h2>
-            <form id="comment-form" onsubmit="submitComment(event)" class="space-y-3 mb-6">
-                <textarea id="comment-text" required placeholder="ඔබේ ප්‍රශ්න හෝ අදහස් මෙතැනින් ලියන්න..." class="w-full bg-gray-900 border border-gray-800 p-3 rounded-xl text-xs text-white focus:outline-none h-20 text-left"></textarea>
-                <div class="text-right">
-                    <button type="submit" class="bg-yellow-500 text-gray-950 font-black px-5 py-1.5 rounded-lg text-xs cursor-pointer uppercase">Post Comment</button>
-                </div>
+        
+        <section class="p-6">
+            <form id="comment-form" onsubmit="submitComment(event)">
+                <textarea id="comment-text" class="w-full bg-gray-800 p-2 rounded" placeholder="Comment..."></textarea>
+                <button class="bg-yellow-500 px-4 py-1 rounded mt-2">Post</button>
             </form>
-            <div id="comments-container" class="space-y-3"></div>
+        </section>
+    </div>
+
+    <div id="limited-content" class="hidden">
+        <nav class="bg-gray-800 p-4 flex justify-between items-center">
+            <span id="lim-nav-name" class="text-yellow-500 font-bold"></span>
+            <button onclick="logoutUser()" class="bg-red-600 px-3 py-1 rounded text-xs">Logout</button>
+        </nav>
+        <section class="p-10 text-center">
+            <h2 class="mb-5 font-bold">Welcome Guest!</h2>
+            <button class="bg-green-600 px-6 py-3 rounded-lg font-black"><i class="fa-solid fa-credit-card mr-2"></i>PAY WITH CARD</button>
+        </section>
+        <section class="p-6">
+            <form id="comment-form" onsubmit="submitComment(event)">
+                <textarea id="comment-text" class="w-full bg-gray-800 p-2 rounded" placeholder="Comment..."></textarea>
+                <button class="bg-yellow-500 px-4 py-1 rounded mt-2">Post</button>
+            </form>
         </section>
     </div>
 
     <script>
-        let currentGate = 'AND'; let inputA = 0; let inputB = 0;
-        function changeGate(gate) {
-            currentGate = gate; document.getElementById('gate-title').innerText = gate;
-            document.getElementById('gate-logic-desc').innerText = gate === 'AND' ? "Y = A . B" : "Y = A + B";
-            calculateOutput();
-        }
-        function toggleInput(type) {
-            if(type === 'A') { inputA = inputA === 0 ? 1 : 0; document.getElementById('btn-inputA').innerText = "A: " + inputA; }
-            else { inputB = inputB === 0 ? 1 : 0; document.getElementById('btn-inputB').innerText = "B: " + inputB; }
-            calculateOutput();
-        }
-        function calculateOutput() {
-            let out = currentGate === 'AND' ? (inputA && inputB) : (inputA || inputB);
-            document.getElementById('txt-output').innerText = out ? 1 : 0;
-        }
-        function convertFrom(type) {
-            let dec = document.getElementById('num-decimal'); let bin = document.getElementById('num-binary');
-            if(type === 'decimal' && dec.value) bin.value = parseInt(dec.value, 10).toString(2);
-            if(type === 'binary' && bin.value) dec.value = parseInt(bin.value, 2).toString(10);
-        }
-
-        function convertSinglishToSinhala() {
-            let text = document.getElementById('unicode-input').value;
-            const rules = [
-                [/nnd/g, "ඳ"], [/nng/g, "ඟ"], [/nndh/g, "ඳ"], [/nmb/g, "ඹ"],
-                [/ch/g, "ච"], [/sh/g, "ශ"], [/th/g, "ත"], [/dh/g, "ද"], [/kh/g, "ඛ"],
-                [/a/g, "අ"], [/b/g, "බ"], [/c/g, "ක"], [/d/g, "ඩ"], [/e/g, "එ"], [/f/g, "ෆ"],
-                [/g/g, "ග"], [/h/g, "හ"], [/i/g, "ඉ"], [/j/g, "ජ"], [/k/g, "ක"], [/l/g, "ල"],
-                [/m/g, "ම"], [/n/g, "න"], [/o/g, "ඔ"], [/p/g, "ප"], [/r/g, "ර"], [/s/g, "ස"],
-                [/t/g, "ට"], [/u/g, "උ"], [/v/g, "ව"], [/w/g, "ව"], [/y/g, "ය"]
-            ];
-            let output = text.toLowerCase()
-                .replace(/amma/g, "අම්මා").replace(/lanka/g, "ලංකා").replace(/heshan/g, "හේෂාන්");
-            rules.forEach(rule => { output = output.replace(rule[0], rule[1]); });
-            document.getElementById('unicode-output').innerText = output || "...";
-        }
+        // මෙතනට ඔබේ පෙර පැවති Logic Gate, Converter සහ Unicode Logic එකේ JavaScript කොටස් දාන්න
     </script>
 </body>
 </html>
