@@ -9,275 +9,351 @@
 </head>
 <body class="bg-gray-900 text-white font-sans antialiased">
 
-    <nav class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row items-center justify-between py-3 md:h-16 gap-3 md:gap-0">
-                <div class="flex items-center">
-                    <span class="text-2xl font-extrabold tracking-wider text-cyan-400">
-                        <i class="fa-solid fa-code-branch mr-2"></i>ICT FROM HESHAN
-                    </span>
-                </div>
-                <div class="flex flex-wrap items-center justify-center gap-4 text-xs md:text-sm text-gray-300">
-                    <span class="font-bold text-white text-base border-r border-gray-700 pr-3">Heshan Jayasundara</span>
-                    <span class="bg-gray-900 px-2 py-1 rounded border border-gray-700 text-cyan-400 font-medium">Pencil Opera Kurunegala</span>
-                    <span class="bg-gray-900 px-2 py-1 rounded border border-gray-700 text-cyan-400 font-medium">Ziyon Kurunegala</span>
-                    <span class="bg-gray-900 px-2 py-1 rounded border border-gray-700 text-cyan-400 font-medium">Sipwin Kurunegala</span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <button onclick="toggleModal('payment-modal')" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-md text-xs font-bold transition text-white cursor-pointer"><i class="fa-solid fa-credit-card mr-1"></i> Pay Fees</button>
-                    <button onclick="toggleModal('login-modal')" class="bg-cyan-600 hover:bg-cyan-500 px-3 py-1.5 rounded-md text-xs font-bold transition text-gray-900 cursor-pointer">LMS Login</button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <section id="home" class="relative overflow-hidden py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-800 to-gray-900">
-        <div class="max-w-5xl mx-auto text-center relative z-10">
-            <span class="bg-cyan-900/50 text-cyan-400 border border-cyan-700 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Sri Lanka's Next-Gen A/L ICT Platform</span>
-            <h1 class="mt-6 text-4xl sm:text-6xl font-black tracking-tight">
-                A/L ICT සරලව, ප්‍රායෝගිකව <br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">සුපිරිම A සාමාර්ථයකට!</span>
-            </h1>
-            <p class="mt-6 text-lg text-gray-400 max-w-2xl mx-auto">
-                කටපාඩම් කරන්නේ නැතුව Logic Gates, Python, Networking සහ Systems සිද්ධාන්ත ප්‍රායෝගිකව ඉගෙන ගන්න ලංකාවේ දියුණුම තාක්ෂණික පන්තියට අදම එකතු වන්න.
-            </p>
-            <div class="mt-10 flex justify-center space-x-4">
-                <a href="#simulator" class="bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold px-6 py-3 rounded-lg shadow-lg shadow-cyan-500/20 transition transform hover:-translate-y-0.5">Try Free Simulator</a>
-                <a href="#unicode-section" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition">Unicode System</a>
-            </div>
-        </div>
-    </section>
-
-    <section id="simulator" class="py-16 px-4 sm:px-6 lg:px-8 border-t border-gray-800 bg-gray-950">
-        <div class="max-w-4xl mx-auto">
-            <div class="text-center mb-10">
-                <h2 class="text-3xl font-bold text-cyan-400"><i class="fa-solid fa-toggle-on mr-2"></i>Interactive Logic Gate Simulator</h2>
-                <p class="text-gray-400 mt-2">Inputs (A සහ B) වෙනස් කරමින් Logic Gate එකෙන් Output එක ලැබෙන විදිහ Live අත්හදා බලන්න.</p>
-            </div>
-
-            <div class="bg-gray-900 rounded-2xl border border-gray-800 p-6 md:p-8 shadow-2xl">
-                <div class="flex flex-wrap gap-2 justify-center mb-8 border-b border-gray-800 pb-6">
-                    <button onclick="changeGate('AND')" id="btn-AND" class="gate-btn bg-cyan-600 text-gray-900 font-bold px-4 py-2 rounded-lg transition cursor-pointer">AND Gate</button>
-                    <button onclick="changeGate('OR')" id="btn-OR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">OR Gate</button>
-                    <button onclick="changeGate('NOT')" id="btn-NOT" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">NOT Gate</button>
-                    <button onclick="changeGate('NAND')" id="btn-NAND" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">NAND Gate</button>
-                    <button onclick="changeGate('NOR')" id="btn-NOR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">NOR Gate</button>
-                    <button onclick="changeGate('XOR')" id="btn-XOR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">XOR Gate</button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center justify-center p-6 bg-gray-950 rounded-xl border border-gray-800">
-                    <div class="flex flex-col items-center space-y-4">
-                        <span class="text-xs uppercase tracking-widest text-gray-500 font-bold">Inputs</span>
-                        <div class="flex items-center space-x-4 bg-gray-900 p-3 rounded-lg w-full justify-between border border-gray-800">
-                            <span class="font-bold text-lg text-cyan-400">Input A</span>
-                            <button onclick="toggleInput('A')" id="btn-inputA" class="bg-gray-800 px-4 py-1.5 rounded font-mono text-xl text-red-500 border border-red-900/50 cursor-pointer">0</button>
-                        </div>
-                        <div id="inputB-container" class="flex items-center space-x-4 bg-gray-900 p-3 rounded-lg w-full justify-between border border-gray-800">
-                            <span class="font-bold text-lg text-cyan-400">Input B</span>
-                            <button onclick="toggleInput('B')" id="btn-inputB" class="bg-gray-800 px-4 py-1.5 rounded font-mono text-xl text-red-500 border border-red-900/50 cursor-pointer">0</button>
-                        </div>
-                    </div>
-
-                    <div class="text-center py-6 md:py-0 border-y md:border-y-0 md:border-x border-gray-800 flex flex-col items-center justify-center">
-                        <span id="gate-title" class="text-2xl font-black text-white tracking-widest mb-2">AND</span>
-                        <div class="w-24 h-24 bg-cyan-950/40 border-2 border-cyan-500/50 rounded-full flex items-center justify-center shadow-lg shadow-cyan-500/10">
-                            <i id="gate-icon" class="fa-solid fa-microchip text-4xl text-cyan-400"></i>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col items-center justify-center space-y-2">
-                        <span class="text-xs uppercase tracking-widest text-gray-500 font-bold">Output (Y)</span>
-                        <div id="output-box" class="w-24 h-24 bg-gray-950 rounded-xl flex items-center justify-center border-2 border-red-500 shadow-lg transition duration-300">
-                            <span id="txt-output" class="text-4xl font-mono font-bold text-red-500">0</span>
-                        </div>
-                        <span id="gate-logic-desc" class="text-xs text-gray-400 text-center mt-2 font-mono">Y = A . B</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="unicode-section" class="py-16 px-4 sm:px-6 lg:px-8 border-t border-gray-800 bg-gray-900">
-        <div class="max-w-4xl mx-auto">
-            <div class="text-center mb-10">
-                <h2 class="text-3xl font-bold text-purple-400"><i class="fa-solid fa-font mr-2"></i>Sinhala Unicode Converter System</h2>
-                <p class="text-gray-400 mt-2">සිංහල අකුරු ටයිප් කර එහි Unicode අගයන් සහ ද්විමය (Binary) පරිවර්තන පද්ධතිය සජීවීව බලාගන්න.</p>
-            </div>
-
-            <div class="bg-gray-950 rounded-2xl border border-gray-800 p-6 md:p-8 shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Input Sinhala Text</label>
-                    <textarea id="unicode-input" oninput="processUnicode()" class="w-full h-40 bg-gray-900 border border-gray-800 rounded-lg p-4 text-white focus:outline-none focus:border-purple-500" placeholder="මෙතන සිංහලෙන් ටයිප් කරන්න... (उदा: අ, ක, ict)"></textarea>
-                </div>
-                <div class="flex flex-col justify-between space-y-4">
-                    <div class="bg-gray-900 p-4 rounded-lg border border-gray-800">
-                        <span class="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-1">Character Code (UTF-16 / Hex)</span>
-                        <div id="unicode-hex" class="font-mono text-xl text-purple-400 font-bold">-</div>
-                    </div>
-                    <div class="bg-gray-900 p-4 rounded-lg border border-gray-800 h-full overflow-y-auto">
-                        <span class="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-1">Binary Stream (ගණන් හැදීමට)</span>
-                        <div id="unicode-binary" class="font-mono text-xs text-emerald-400 break-all leading-relaxed">-</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="courses" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-gray-800">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold">Available A/L Courses</h2>
-            <p class="text-gray-400 mt-2">ඔබට ගැළපෙනම පාඨමාලාව තෝරාගෙන අදම වැඩ අරඹන්න.</p>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 flex flex-col justify-between">
-                <div>
-                    <span class="bg-blue-900/60 text-blue-400 text-xs px-2.5 py-1 rounded font-bold uppercase">Theory</span>
-                    <h3 class="text-xl font-bold mt-3">2027 A/L Theory</h3>
-                    <p class="text-gray-400 mt-2 text-sm">ICT මුල සිට සරලව. දත්ත සන්නිවේදනය, දත්ත සමුදාය සහ ප්‍රකලනය (Python) ඇතුළු සියලුම විෂය නිර්දේශය ආවරණය කෙරේ.</p>
-                </div>
-                <button onclick="toggleModal('payment-modal')" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg transition cursor-pointer">Pay & Enrol</button>
-            </div>
-            <div class="bg-gray-800 rounded-xl p-6 border border-cyan-500/30 shadow-lg shadow-cyan-500/5 flex flex-col justify-between">
-                <div>
-                    <span class="bg-cyan-900/60 text-cyan-400 text-xs px-2.5 py-1 rounded font-bold uppercase">Revision</span>
-                    <h3 class="text-xl font-bold mt-3">2026 A/L Revision</h3>
-                    <p class="text-gray-400 mt-2 text-sm">පූර්ණ විෂය පුනරීක්ෂණය, පසුගිය විභාග ප්‍රශ්න පත්‍ර සාකච්ඡාව සහ වැදගත් සිද්ධාන්ත කෙටි ක්‍රම.</p>
-                </div>
-                <button onclick="toggleModal('payment-modal')" class="w-full mt-6 bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold py-2 rounded-lg transition cursor-pointer">Pay & Enrol</button>
-            </div>
-            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 flex flex-col justify-between">
-                <div>
-                    <span class="bg-purple-900/60 text-purple-400 text-xs px-2.5 py-1 rounded font-bold uppercase">Paper Class</span>
-                    <h3 class="text-xl font-bold mt-3">2026 Paper Class</h3>
-                    <p class="text-gray-400 mt-2 text-sm">සතිපතා කාලයට අනුව MCQ සහ Structural/Essay පත්‍ර ලබා දීම සහ Live Marking පද්ධතිය.</p>
-                </div>
-                <button onclick="toggleModal('payment-modal')" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg transition cursor-pointer">Pay & Enrol</button>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-16 border-t border-gray-800 bg-gray-950 px-4">
-        <div class="max-w-2xl mx-auto text-center">
-            <h2 class="text-3xl font-bold text-yellow-500 mb-2"><i class="fa-solid fa-star mr-2"></i>Rate Our Platform</h2>
-            <p class="text-gray-400 mb-6">පද්ධතිය පිළිබඳ ඔබගේ වටිනා අදහස් සහ තරු සලකුණු ලබා දෙන්න.</p>
-            
-            <div class="flex justify-center space-x-2 text-3xl mb-6 text-gray-600">
-                <i onclick="setRating(1)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
-                <i onclick="setRating(2)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
-                <i onclick="setRating(3)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
-                <i onclick="setRating(4)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
-                <i onclick="setRating(5)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
-            </div>
-
-            <form onsubmit="event.preventDefault(); alert('ඔබගේ ප්‍රතිපෝෂණයට ස්තූතියි, සර්!'); this.reset(); setRating(0);" class="space-y-4">
-                <textarea required placeholder="ඔබේ අදහස් මෙතන ලියන්න (Comment)..." class="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl text-white focus:outline-none focus:border-yellow-500"></textarea>
-                <button type="submit" class="bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-gray-950 font-black px-8 py-2.5 rounded-lg shadow-lg transition tracking-wide cursor-pointer uppercase text-xs">Submit Review</button>
-            </form>
-        </div>
-    </section>
-
-    <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
-            <button onclick="toggleModal('login-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+    <!-- ================= START SCREEN: SIGN UP GATE ================= -->
+    <div id="signup-gate" class="fixed inset-0 bg-gray-950 z-999 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 md:p-8 shadow-2xl my-auto">
             <div class="text-center mb-6">
-                <h3 class="text-2xl font-bold text-cyan-400"><i class="fa-solid fa-user-graduate mr-2"></i>LMS Student Login</h3>
-                <p class="text-gray-400 text-sm mt-1">ඔබගේ ගිණුමට ඇතුළු වී පාඩම් මාලා ලබාගන්න.</p>
+                <span class="bg-cyan-900/50 text-cyan-400 border border-cyan-700 text-2xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Welcome Student</span>
+                <h2 class="text-2xl font-black mt-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">ICT FROM HESHAN</h2>
+                <p class="text-gray-400 text-sm mt-1">පද්ධතියට ඇතුළු වීමට ප්‍රථමයෙන් ලියාපදිංචි වන්න.</p>
             </div>
-            <form onsubmit="event.preventDefault(); alert('LMS Dashboard පද්ධතිය සම්බන්ධ වෙමින් පවතී!');" class="space-y-4">
+            
+            <form id="gate-signup-form" onsubmit="handleInitialSignup(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Student ID / Email</label>
-                    <input type="text" placeholder="HESHAN/ICT/XXXX" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 font-mono">
+                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">ඔබේ සම්පූර්ණ නම (Full Name)</label>
+                    <input type="text" id="gate-name" required placeholder="Ex: Kamal Perera" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 text-sm">
                 </div>
-                <div>
-                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Password</label>
-                    <input type="password" placeholder="••••••••" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500">
-                </div>
-                <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold py-3 rounded-lg transition uppercase tracking-wider text-sm shadow-lg shadow-cyan-500/20 cursor-pointer">Login to Dashboard</button>
-            </form>
-        </div>
-    </div>
 
-    <div id="payment-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
-            <button onclick="toggleModal('payment-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-            <div class="text-center mb-4">
-                <h3 class="text-2xl font-bold text-emerald-400"><i class="fa-solid fa-shield-halved mr-2"></i>Secure Card Payment</h3>
-                <p class="text-gray-400 text-sm mt-1">ආයතනික සහ පන්ති තොරතුරු නිවැරදිව තෝරා ගෙවීම් කරන්න.</p>
-            </div>
-            <form onsubmit="event.preventDefault(); alert('ගෙවීම් සාර්ථකයි! විස්තර පද්ධතියට ඇතුළත් විය.'); toggleModal('payment-modal');" class="space-y-3">
-                
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">පන්ති යන ආයතනය</label>
-                        <select required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 bg-gray-900">
+                        <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">පන්ති යන ආයතනය</label>
+                        <select id="gate-institute" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-500 bg-gray-900">
                             <option value="">තෝරන්න...</option>
-                            <option>Pencil Opera Kurunegala</option>
-                            <option>Ziyon Kurunegala</option>
-                            <option>Sipwin Kurunegala</option>
+                            <option value="Pencil Opera Kurunegala">Pencil Opera Kurunegala</option>
+                            <option value="Ziyon Kurunegala">Ziyon Kurunegala</option>
+                            <option value="Sipwin Kurunegala">Sipwin Kurunegala</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">A/L වර්ෂය</label>
-                        <select required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 bg-gray-900">
+                        <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">A/L වර්ෂය</label>
+                        <select id="gate-year" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-500 bg-gray-900">
                             <option value="">වර්ෂය...</option>
-                            <option>2026</option>
-                            <option>2027</option>
-                            <option>2028</option>
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">ශිෂ්‍යයාගේ නම</label>
-                        <input type="text" required placeholder="Name" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500">
-                    </div>
-                    <div>
-                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">ආයතනික හැඳුනුම්පත් අංකය</label>
-                        <input type="text" required placeholder="Institute ID No" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono">
-                    </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">මුරපදය (Password)</label>
+                    <input type="password" id="gate-password" required placeholder="••••••••" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 text-sm">
                 </div>
 
-                <div>
-                    <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">පාඨමාලාව</label>
-                    <select class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 bg-gray-900">
-                        <option>2027 A/L Theory — LKR 3,000</option>
-                        <option>2026 A/L Revision — LKR 3,500</option>
-                        <option>2026 Paper Class — LKR 2,500</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">Card Number</label>
-                    <div class="relative">
-                        <input type="text" required placeholder="4111 2222 3333 4444" class="w-full bg-gray-950 border border-gray-800 rounded-lg pl-3 pr-10 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono">
-                        <i class="fa-solid fa-credit-card absolute right-3 top-2.5 text-gray-500 text-xs"></i>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">Expiry Date</label>
-                        <input type="text" required placeholder="MM / YY" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono">
-                    </div>
-                    <div>
-                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">CVC / CVV</label>
-                        <input type="password" required placeholder="•••" maxlength="3" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono">
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-gray-900 font-black py-2.5 rounded-lg transition uppercase tracking-wider text-xs shadow-lg shadow-emerald-500/20 cursor-pointer mt-1">Pay via Secured Gate</button>
+                <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-black py-3 rounded-lg transition uppercase tracking-wider text-sm shadow-lg shadow-cyan-500/20 cursor-pointer mt-2 flex items-center justify-center gap-2">
+                    Submit & Enter Platform <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
             </form>
         </div>
     </div>
+    <!-- ================= END SCREEN: SIGN UP GATE ================= -->
 
-    <footer class="bg-gray-950 border-t border-gray-800 py-8 text-center text-sm text-gray-500">
-        <p>&copy; 2026 ICT From Heshan. All Rights Reserved. Designed for Next-Gen Tech Students.</p>
-    </footer>
+
+    <!-- MAIN CONTENT CONTAINER (Hidden by default, shown after sign up) -->
+    <div id="main-content" class="hidden">
+        
+        <nav class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row items-center justify-between py-3 md:h-16 gap-3 md:gap-0">
+                    <div class="flex items-center">
+                        <span class="text-2xl font-extrabold tracking-wider text-cyan-400">
+                            <i class="fa-solid fa-code-branch mr-2"></i>ICT FROM HESHAN
+                        </span>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-center gap-4 text-xs md:text-sm text-gray-300">
+                        <!-- Dynamic User Details -->
+                        <span id="nav-user-name" class="font-bold text-white text-base border-r border-gray-700 pr-3">Heshan Jayasundara</span>
+                        <span id="nav-user-badge" class="bg-gray-900 px-2 py-1 rounded border border-gray-700 text-cyan-400 font-medium">Pencil Opera Kurunegala</span>
+                        <span id="nav-user-year" class="bg-gray-900 px-2 py-1 rounded border border-gray-700 text-purple-400 font-medium">2026 A/L</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="toggleModal('payment-modal')" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-md text-xs font-bold transition text-white cursor-pointer"><i class="fa-solid fa-credit-card mr-1"></i> Pay Fees</button>
+                        <button onclick="toggleModal('login-modal')" class="bg-cyan-600 hover:bg-cyan-500 px-3 py-1.5 rounded-md text-xs font-bold transition text-gray-900 cursor-pointer">LMS Login</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <section id="home" class="relative overflow-hidden py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-800 to-gray-900">
+            <div class="max-w-5xl mx-auto text-center relative z-10">
+                <span class="bg-cyan-900/50 text-cyan-400 border border-cyan-700 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Sri Lanka's Next-Gen A/L ICT Platform</span>
+                <h1 class="mt-6 text-4xl sm:text-6xl font-black tracking-tight">
+                    A/L ICT සරලව, ප්‍රායෝගිකව <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">සුපිරිම A සාමාර්ථයකට!</span>
+                </h1>
+                <p class="mt-6 text-lg text-gray-400 max-w-2xl mx-auto">
+                    කටපාඩම් කරන්නේ නැතුව Logic Gates, Python, Networking සහ Systems සිද්ධාන්ත ප්‍රායෝගිකව ඉගෙන ගන්න ලංකාවේ දියුණුම තාක්ෂණික පන්තියට අදම එකතු වන්න.
+                </p>
+                <div class="mt-10 flex justify-center space-x-4">
+                    <a href="#simulator" class="bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold px-6 py-3 rounded-lg shadow-lg shadow-cyan-500/20 transition transform hover:-translate-y-0.5">Try Free Simulator</a>
+                    <a href="#unicode-section" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition">Unicode System</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="simulator" class="py-16 px-4 sm:px-6 lg:px-8 border-t border-gray-800 bg-gray-950">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-cyan-400"><i class="fa-solid fa-toggle-on mr-2"></i>Interactive Logic Gate Simulator</h2>
+                    <p class="text-gray-400 mt-2">Inputs (A සහ B) වෙනස් කරමින් Logic Gate එකෙන් Output එක ලැබෙන විදිහ Live අත්හදා බලන්න.</p>
+                </div>
+
+                <div class="bg-gray-900 rounded-2xl border border-gray-800 p-6 md:p-8 shadow-2xl">
+                    <div class="flex flex-wrap gap-2 justify-center mb-8 border-b border-gray-800 pb-6">
+                        <button onclick="changeGate('AND')" id="btn-AND" class="gate-btn bg-cyan-600 text-gray-900 font-bold px-4 py-2 rounded-lg transition cursor-pointer">AND Gate</button>
+                        <button onclick="changeGate('OR')" id="btn-OR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">OR Gate</button>
+                        <button onclick="changeGate('NOT')" id="btn-NOT" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">NOT Gate</button>
+                        <button onclick="changeGate('NAND')" id="btn-NAND" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">NAND Gate</button>
+                        <button onclick="changeGate('NOR')" id="btn-NOR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">NOR Gate</button>
+                        <button onclick="changeGate('XOR')" id="btn-XOR" class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">XOR Gate</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center justify-center p-6 bg-gray-950 rounded-xl border border-gray-800">
+                        <div class="flex flex-col items-center space-y-4">
+                            <span class="text-xs uppercase tracking-widest text-gray-500 font-bold">Inputs</span>
+                            <div class="flex items-center space-x-4 bg-gray-900 p-3 rounded-lg w-full justify-between border border-gray-800">
+                                <span class="font-bold text-lg text-cyan-400">Input A</span>
+                                <button onclick="toggleInput('A')" id="btn-inputA" class="bg-gray-800 px-4 py-1.5 rounded font-mono text-xl text-red-500 border border-red-900/50 cursor-pointer">0</button>
+                            </div>
+                            <div id="inputB-container" class="flex items-center space-x-4 bg-gray-900 p-3 rounded-lg w-full justify-between border border-gray-800">
+                                <span class="font-bold text-lg text-cyan-400">Input B</span>
+                                <button onclick="toggleInput('B')" id="btn-inputB" class="bg-gray-800 px-4 py-1.5 rounded font-mono text-xl text-red-500 border border-red-900/50 cursor-pointer">0</button>
+                            </div>
+                        </div>
+
+                        <div class="text-center py-6 md:py-0 border-y md:border-y-0 md:border-x border-gray-800 flex flex-col items-center justify-center">
+                            <span id="gate-title" class="text-2xl font-black text-white tracking-widest mb-2">AND</span>
+                            <div class="w-24 h-24 bg-cyan-950/40 border-2 border-cyan-500/50 rounded-full flex items-center justify-center shadow-lg shadow-cyan-500/10">
+                                <i id="gate-icon" class="fa-solid fa-microchip text-4xl text-cyan-400"></i>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center justify-center space-y-2">
+                            <span class="text-xs uppercase tracking-widest text-gray-500 font-bold">Output (Y)</span>
+                            <div id="output-box" class="w-24 h-24 bg-gray-950 rounded-xl flex items-center justify-center border-2 border-red-500 shadow-lg transition duration-300">
+                                <span id="txt-output" class="text-4xl font-mono font-bold text-red-500">0</span>
+                            </div>
+                            <span id="gate-logic-desc" class="text-xs text-gray-400 text-center mt-2 font-mono">Y = A . B</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="unicode-section" class="py-16 px-4 sm:px-6 lg:px-8 border-t border-gray-800 bg-gray-900">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-purple-400"><i class="fa-solid fa-font mr-2"></i>Sinhala Unicode Converter System</h2>
+                    <p class="text-gray-400 mt-2">සිංහල අකුරු ටයිප් කර එහි Unicode අගයන් සහ ද්විමය (Binary) පරිවර්තන පද්ධතිය සජීවීව බලාගන්න.</p>
+                </div>
+
+                <div class="bg-gray-950 rounded-2xl border border-gray-800 p-6 md:p-8 shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Input Sinhala Text</label>
+                        <textarea id="unicode-input" oninput="processUnicode()" class="w-full h-40 bg-gray-900 border border-gray-800 rounded-lg p-4 text-white focus:outline-none focus:border-purple-500" placeholder="මෙතන සිංහලෙන් ටයිප් කරන්න... (उदा: අ, ක, ict)"></textarea>
+                    </div>
+                    <div class="flex flex-col justify-between space-y-4">
+                        <div class="bg-gray-900 p-4 rounded-lg border border-gray-800">
+                            <span class="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-1">Character Code (UTF-16 / Hex)</span>
+                            <div id="unicode-hex" class="font-mono text-xl text-purple-400 font-bold">-</div>
+                        </div>
+                        <div class="bg-gray-900 p-4 rounded-lg border border-gray-800 h-full overflow-y-auto">
+                            <span class="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-1">Binary Stream (ගණන් හැදීමට)</span>
+                            <div id="unicode-binary" class="font-mono text-xs text-emerald-400 break-all leading-relaxed">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="courses" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-gray-800">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold">Available A/L Courses</h2>
+                <p class="text-gray-400 mt-2">ඔබට ගැළපෙනම පාඨමාලාව තෝරාගෙන අදම වැඩ අරඹන්න.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 flex flex-col justify-between">
+                    <div>
+                        <span class="bg-blue-900/60 text-blue-400 text-xs px-2.5 py-1 rounded font-bold uppercase">Theory</span>
+                        <h3 class="text-xl font-bold mt-3">2027 A/L Theory</h3>
+                        <p class="text-gray-400 mt-2 text-sm">ICT මුල සිට සරලව. දත්ත සන්නිවේදනය, දත්ත සමුදාය සහ ප්‍රකලනය (Python) ඇතුළු සියලුම විෂය නිර්දේශය ආවරණය කෙරේ.</p>
+                    </div>
+                    <button onclick="toggleModal('payment-modal')" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg transition cursor-pointer">Pay & Enrol</button>
+                </div>
+                <div class="bg-gray-800 rounded-xl p-6 border border-cyan-500/30 shadow-lg shadow-cyan-500/5 flex flex-col justify-between">
+                    <div>
+                        <span class="bg-cyan-900/60 text-cyan-400 text-xs px-2.5 py-1 rounded font-bold uppercase">Revision</span>
+                        <h3 class="text-xl font-bold mt-3">2026 A/L Revision</h3>
+                        <p class="text-gray-400 mt-2 text-sm">පූර්ණ විෂය පුනරීක්ෂණය, පසුගිය විභාග ප්‍රශ්න පත්‍ර සාකච්ඡාව සහ වැදගත් සිද්ධාන්ත කෙටි ක්‍රම.</p>
+                    </div>
+                    <button onclick="toggleModal('payment-modal')" class="w-full mt-6 bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold py-2 rounded-lg transition cursor-pointer">Pay & Enrol</button>
+                </div>
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 flex flex-col justify-between">
+                    <div>
+                        <span class="bg-purple-900/60 text-purple-400 text-xs px-2.5 py-1 rounded font-bold uppercase">Paper Class</span>
+                        <h3 class="text-xl font-bold mt-3">2026 Paper Class</h3>
+                        <p class="text-gray-400 mt-2 text-sm">සතිපතා කාලයට අනුව MCQ සහ Structural/Essay පත්‍ර ලබා දීම සහ Live Marking පද්ධතිය.</p>
+                    </div>
+                    <button onclick="toggleModal('payment-modal')" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg transition cursor-pointer">Pay & Enrol</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-16 border-t border-gray-800 bg-gray-950 px-4">
+            <div class="max-w-2xl mx-auto text-center">
+                <h2 class="text-3xl font-bold text-yellow-500 mb-2"><i class="fa-solid fa-star mr-2"></i>Rate Our Platform</h2>
+                <p class="text-gray-400 mb-6">පද්ධතිය පිළිබඳ ඔබගේ වටිනා අදහස් සහ තරු සලකුණු ලබා දෙන්න.</p>
+                
+                <div class="flex justify-center space-x-2 text-3xl mb-6 text-gray-600">
+                    <i onclick="setRating(1)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
+                    <i onclick="setRating(2)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
+                    <i onclick="setRating(3)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
+                    <i onclick="setRating(4)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
+                    <i onclick="setRating(5)" class="fa-solid fa-star star-icon cursor-pointer hover:text-yellow-400 transition"></i>
+                </div>
+
+                <form onsubmit="event.preventDefault(); alert('ඔබගේ ප්‍රතිපෝෂණයට ස්තූතියි, සර්!'); this.reset(); setRating(0);" class="space-y-4">
+                    <textarea required placeholder="ඔබේ අදහස් මෙතන ලියන්න (Comment)..." class="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl text-white focus:outline-none focus:border-yellow-500"></textarea>
+                    <button type="submit" class="bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-gray-950 font-black px-8 py-2.5 rounded-lg shadow-lg transition tracking-wide cursor-pointer uppercase text-xs">Submit Review</button>
+                </form>
+            </div>
+        </section>
+
+        <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
+                <button onclick="toggleModal('login-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-cyan-400"><i class="fa-solid fa-user-graduate mr-2"></i>LMS Student Login</h3>
+                    <p class="text-gray-400 text-sm mt-1">ඔබගේ ගිණුමට ඇතුළු වී පාඩම් මාලා ලබාගන්න.</p>
+                </div>
+                <form onsubmit="event.preventDefault(); alert('LMS Dashboard පද්ධතිය සම්බන්ධ වෙමින් පවතී!');" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Student ID / Email</label>
+                        <input type="text" placeholder="HESHAN/ICT/XXXX" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Password</label>
+                        <input type="password" placeholder="••••••••" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold py-3 rounded-lg transition uppercase tracking-wider text-sm shadow-lg shadow-cyan-500/20 cursor-pointer">Login to Dashboard</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="payment-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
+                <button onclick="toggleModal('payment-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                <div class="text-center mb-4">
+                    <h3 class="text-2xl font-bold text-emerald-400"><i class="fa-solid fa-shield-halved mr-2"></i>Secure Card Payment</h3>
+                    <p class="text-gray-400 text-sm mt-1">ආයතනික සහ පන්ති තොරතුරු නිවැරදිව තෝරා ගෙවීම් කරන්න.</p>
+                </div>
+                <form onsubmit="event.preventDefault(); alert('ගෙවීම් සාර්ථකයි! විස්තර පද්ධතියට ඇතුළත් විය.'); toggleModal('payment-modal');" class="space-y-3">
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">පන්ති යන ආයතනය</label>
+                            <select required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 bg-gray-900">
+                                <option value="">තෝරන්න...</option>
+                                <option>Pencil Opera Kurunegala</option>
+                                <option>Ziyon Kurunegala</option>
+                                <option>Sipwin Kurunegala</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">A/L වර්ෂය</label>
+                            <select required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 bg-gray-900">
+                                <option value="">වර්ෂය...</option>
+                                <option>2026</option>
+                                <option>2027</option>
+                                <option>2028</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">ශිෂ්‍යයාගේ නම</label>
+                            <input type="text" required placeholder="Name" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">ආයතනික හැඳුනුම්පත් අංකය</label>
+                            <input type="text" required placeholder="Institute ID No" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">පාඨමාලාව</label>
+                        <select class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 bg-gray-900">
+                            <option>2027 A/L Theory — LKR 3,000</option>
+                            <option>2026 A/L Revision — LKR 3,500</option>
+                            <option>2026 Paper Class — LKR 2,500</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">Card Number</label>
+                        <div class="relative">
+                            <input type="text" required placeholder="4111 2222 3333 4444" class="w-full bg-gray-950 border border-gray-800 rounded-lg pl-3 pr-10 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono">
+                            <i class="fa-solid fa-credit-card absolute right-3 top-2.5 text-gray-500 text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">Expiry Date</label>
+                            <input type="text" required placeholder="MM / YY" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-2xs font-bold uppercase text-gray-400 tracking-wider mb-1">CVC / CVV</label>
+                            <input type="password" required placeholder="•••" maxlength="3" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-gray-900 font-black py-2.5 rounded-lg transition uppercase tracking-wider text-xs shadow-lg shadow-emerald-500/20 cursor-pointer mt-1">Pay via Secured Gate</button>
+                </form>
+            </div>
+        </div>
+
+        <footer class="bg-gray-950 border-t border-gray-800 py-8 text-center text-sm text-gray-500">
+            <p>&copy; 2026 ICT From Heshan. All Rights Reserved. Designed for Next-Gen Tech Students.</p>
+        </footer>
+
+    </div>
 
     <script>
         let currentGate = 'AND';
         let inputA = 0;
         let inputB = 0;
+
+        /* --- GATE SYSTEM: SIGN UP CONTROLLER --- */
+        function handleInitialSignup(event) {
+            event.preventDefault();
+            
+            // Get values entered by user
+            const name = document.getElementById('gate-name').value;
+            const institute = document.getElementById('gate-institute').value;
+            const year = document.getElementById('gate-year').value;
+            
+            // Set dynamic text in Navigation bar
+            document.getElementById('nav-user-name').innerText = name;
+            document.getElementById('nav-user-badge').innerText = institute;
+            document.getElementById('nav-user-year').innerText = year + " A/L";
+
+            // Hide the Signup Gate and show main LMS platform
+            document.getElementById('signup-gate').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            
+            alert('සාර්ථකව ලියාපදිංචි විය! ICT From Heshan පද්ධතියට සාදරයෙන් පිළිගනිමු.');
+        }
 
         function toggleModal(modalId) {
             const modal = document.getElementById(modalId);
@@ -400,3 +476,4 @@
     </script>
 </body>
 </html>
+
