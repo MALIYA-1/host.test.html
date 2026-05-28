@@ -1,647 +1,89 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT From Heshan | Premium A/L LMS & Payments</title>
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-
-        .animate-pulse {
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: .5; }
-            100% { opacity: 1; }
-        }
-
-        .text-2xs {
-            font-size: 10px;
-        }
-    </style>
-</head>
-
-<body class="bg-gray-900 text-white font-sans antialiased">
-
-<!-- ================= START SCREEN: SIGN UP GATE ================= -->
-<div id="signup-gate" class="fixed inset-0 bg-gray-950 z-50 flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 md:p-8 shadow-2xl my-auto">
-
-        <div class="text-center mb-6">
-            <span class="bg-cyan-900/50 text-cyan-400 border border-cyan-700 text-2xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">
-                Welcome Student
-            </span>
-
-            <h2 class="text-2xl font-black mt-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-                ICT FROM HESHAN
-            </h2>
-
-            <p class="text-gray-400 text-sm mt-1">
-                පද්ධතියට ඇතුළු වීමට ප්‍රථමයෙන් ලියාපදිංචි වන්න.
-            </p>
-        </div>
-
-        <form id="gate-signup-form" onsubmit="handleInitialSignup(event)" class="space-y-4">
-
-            <div>
-                <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">
-                    ඔබේ සම්පූර්ණ නම
-                </label>
-
-                <input type="text" id="gate-name" required
-                    placeholder="Ex: Kamal Perera"
-                    class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 text-sm">
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-
-                <div>
-                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">
-                        පන්ති යන ආයතනය
-                    </label>
-
-                    <select id="gate-institute" required
-                        class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-500">
-
-                        <option value="">තෝරන්න...</option>
-                        <option value="Pencil Opera Kurunegala">Pencil Opera Kurunegala</option>
-                        <option value="Ziyon Kurunegala">Ziyon Kurunegala</option>
-                        <option value="Sipwin Kurunegala">Sipwin Kurunegala</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">
-                        A/L වර්ෂය
-                    </label>
-
-                    <select id="gate-year" required
-                        class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-500">
-
-                        <option value="">වර්ෂය...</option>
-                        <option value="2026">2026</option>
-                        <option value="2027">2027</option>
-                        <option value="2028">2028</option>
-                    </select>
-                </div>
-
-            </div>
-
-            <div>
-                <label class="block text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">
-                    Password
-                </label>
-
-                <input type="password" id="gate-password" required
-                    placeholder="••••••••"
-                    class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500 text-sm">
-            </div>
-
-            <button type="submit"
-                class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-black py-3 rounded-lg transition uppercase tracking-wider text-sm shadow-lg shadow-cyan-500/20 cursor-pointer mt-2 flex items-center justify-center gap-2">
-
-                Submit & Enter Platform
-                <i class="fa-solid fa-arrow-right text-xs"></i>
-            </button>
-
-        </form>
-    </div>
-</div>
-
-<!-- MAIN CONTENT -->
-<div id="main-content" class="hidden">
-
-    <!-- NAVBAR -->
-    <nav class="bg-gray-800 border-b border-gray-700 sticky top-0 z-40">
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-            <div class="flex flex-col md:flex-row items-center justify-between py-3 gap-3">
-
-                <div class="flex items-center">
-                    <span class="text-2xl font-extrabold tracking-wider text-cyan-400">
-                        <i class="fa-solid fa-code-branch mr-2"></i>
-                        ICT FROM HESHAN
-                    </span>
-                </div>
-
-                <div class="flex flex-wrap items-center justify-center gap-4 text-xs md:text-sm text-gray-300">
-
-                    <span id="nav-user-name"
-                        class="font-bold text-white text-base border-r border-gray-700 pr-3">
-                        Heshan
-                    </span>
-
-                    <span id="nav-user-badge"
-                        class="bg-gray-900 px-2 py-1 rounded border border-gray-700 text-cyan-400 font-medium">
-                        Pencil Opera
-                    </span>
-
-                    <span id="nav-user-year"
-                        class="bg-gray-900 px-2 py-1 rounded border border-gray-700 text-purple-400 font-medium">
-                        2026 A/L
-                    </span>
-
-                </div>
-
-                <div class="flex items-center space-x-3">
-
-                    <button onclick="toggleModal('payment-modal')"
-                        class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-md text-xs font-bold transition text-white cursor-pointer">
-
-                        <i class="fa-solid fa-credit-card mr-1"></i>
-                        Pay Fees
-                    </button>
-
-                    <button onclick="toggleModal('login-modal')"
-                        class="bg-cyan-600 hover:bg-cyan-500 px-3 py-1.5 rounded-md text-xs font-bold transition text-gray-900 cursor-pointer">
-
-                        LMS Login
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-    </nav>
-
-    <!-- HERO -->
-    <section class="relative overflow-hidden py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-800 to-gray-900">
-
-        <div class="max-w-5xl mx-auto text-center relative z-10">
-
-            <span class="bg-cyan-900/50 text-cyan-400 border border-cyan-700 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">
-                Sri Lanka's Next-Gen A/L ICT Platform
-            </span>
-
-            <h1 class="mt-6 text-4xl sm:text-6xl font-black tracking-tight">
-
-                A/L ICT සරලව, ප්‍රායෝගිකව
-
-                <br>
-
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-                    සුපිරිම A සාමාර්ථයකට!
-                </span>
-
-            </h1>
-
-            <p class="mt-6 text-lg text-gray-400 max-w-2xl mx-auto">
-                Logic Gates, Python, Networking සහ Systems සිද්ධාන්ත
-                ප්‍රායෝගිකව ඉගෙන ගන්න.
-            </p>
-
-        </div>
-    </section>
-
-    <!-- LOGIC GATE -->
-    <section class="py-16 px-4 bg-gray-950">
-
-        <div class="max-w-4xl mx-auto">
-
-            <div class="text-center mb-10">
-
-                <h2 class="text-3xl font-bold text-cyan-400">
-                    <i class="fa-solid fa-toggle-on mr-2"></i>
-                    Interactive Logic Gate Simulator
-                </h2>
-
-                <p class="text-gray-400 mt-2">
-                    Logic Gates Live Test කරන්න.
-                </p>
-
-            </div>
-
-            <div class="bg-gray-900 rounded-2xl border border-gray-800 p-6 md:p-8 shadow-2xl">
-
-                <div class="flex flex-wrap gap-2 justify-center mb-8 border-b border-gray-800 pb-6">
-
-                    <button onclick="changeGate('AND')" id="btn-AND"
-                        class="gate-btn bg-cyan-600 text-gray-900 font-bold px-4 py-2 rounded-lg transition cursor-pointer">
-                        AND
-                    </button>
-
-                    <button onclick="changeGate('OR')" id="btn-OR"
-                        class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">
-                        OR
-                    </button>
-
-                    <button onclick="changeGate('NOT')" id="btn-NOT"
-                        class="gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer">
-                        NOT
-                    </button>
-
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center justify-center p-6 bg-gray-950 rounded-xl border border-gray-800">
-
-                    <div class="flex flex-col items-center space-y-4">
-
-                        <div class="flex items-center space-x-4 bg-gray-900 p-3 rounded-lg w-full justify-between border border-gray-800">
-
-                            <span class="font-bold text-lg text-cyan-400">
-                                Input A
-                            </span>
-
-                            <button onclick="toggleInput('A')" id="btn-inputA"
-                                class="bg-gray-800 px-4 py-1.5 rounded font-mono text-xl text-red-500 border border-red-900/50 cursor-pointer">
-
-                                0
-                            </button>
-
-                        </div>
-
-                        <div id="inputB-container"
-                            class="flex items-center space-x-4 bg-gray-900 p-3 rounded-lg w-full justify-between border border-gray-800">
-
-                            <span class="font-bold text-lg text-cyan-400">
-                                Input B
-                            </span>
-
-                            <button onclick="toggleInput('B')" id="btn-inputB"
-                                class="bg-gray-800 px-4 py-1.5 rounded font-mono text-xl text-red-500 border border-red-900/50 cursor-pointer">
-
-                                0
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                    <div class="text-center py-6 md:py-0 border-y md:border-y-0 md:border-x border-gray-800 flex flex-col items-center justify-center">
-
-                        <span id="gate-title"
-                            class="text-2xl font-black text-white tracking-widest mb-2">
-
-                            AND
-                        </span>
-
-                        <div class="w-24 h-24 bg-cyan-950/40 border-2 border-cyan-500/50 rounded-full flex items-center justify-center">
-
-                            <i class="fa-solid fa-microchip text-4xl text-cyan-400"></i>
-
-                        </div>
-
-                    </div>
-
-                    <div class="flex flex-col items-center justify-center space-y-2">
-
-                        <span class="text-xs uppercase tracking-widest text-gray-500 font-bold">
-                            Output
-                        </span>
-
-                        <div id="output-box"
-                            class="w-24 h-24 bg-gray-950 rounded-xl flex items-center justify-center border-2 border-red-500">
-
-                            <span id="txt-output"
-                                class="text-4xl font-mono font-bold text-red-500">
-
-                                0
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-    <!-- FOOTER -->
-    <footer class="bg-gray-950 border-t border-gray-800 py-8 text-center text-sm text-gray-500">
-
-        <p>
-            © 2026 ICT From Heshan. All Rights Reserved.
-        </p>
-
-    </footer>
-
-</div>
-
-<!-- LOGIN MODAL -->
-<div id="login-modal"
-    class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
-
-        <button onclick="toggleModal('login-modal')"
-            class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl cursor-pointer">
-
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-
-        <div class="text-center mb-6">
-
-            <h3 class="text-2xl font-bold text-cyan-400">
-                LMS Student Login
-            </h3>
-
-        </div>
-
-    </div>
-</div>
-
-<!-- PAYMENT MODAL -->
-<div id="payment-modal"
-    class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 relative shadow-2xl">
-
-        <button onclick="toggleModal('payment-modal')"
-            class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl cursor-pointer">
-
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-
-        <div class="text-center mb-6">
-
-            <h3 class="text-2xl font-bold text-emerald-400">
-                Secure Card Payment
-            </h3>
-
-        </div>
-
-    </div>
-</div>
-
-<script>
-
-let currentGate = 'AND';
-let inputA = 0;
-let inputB = 0;
-
-/* SIGNUP */
-function handleInitialSignup(event) {
-
-    event.preventDefault();
-
-    const name = document.getElementById('gate-name').value;
-    const institute = document.getElementById('gate-institute').value;
-    const year = document.getElementById('gate-year').value;
-
-    document.getElementById('nav-user-name').innerText = name;
-    document.getElementById('nav-user-badge').innerText = institute;
-    document.getElementById('nav-user-year').innerText = year + " A/L";
-
-    document.getElementById('signup-gate').classList.add('hidden');
-    document.getElementById('main-content').classList.remove('hidden');
-
-    alert('සාර්ථකව ලියාපදිංචි විය!');
-}
-
-/* MODAL */
-function toggleModal(modalId) {
-
-    const modal = document.getElementById(modalId);
-
-    modal.classList.toggle('hidden');
-}
-
-/* GATE */
-function changeGate(gate) {
-
-    currentGate = gate;
-
-    document.querySelectorAll('.gate-btn').forEach(btn => {
-
-        btn.className =
-            "gate-btn bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition cursor-pointer";
-    });
-
-    document.getElementById(`btn-${gate}`).className =
-        "gate-btn bg-cyan-600 text-gray-900 font-bold px-4 py-2 rounded-lg transition cursor-pointer";
-
-    document.getElementById('gate-title').innerText = gate;
-
-    calculateOutput();
-}
-
-/* INPUT */
-function toggleInput(type) {
-
-    const btn = document.getElementById(`btn-input${type}`);
-
-    if (type === 'A') {
-
-        inputA = inputA === 0 ? 1 : 0;
-
-        btn.innerText = inputA;
-
-        updateInputStyle(btn, inputA);
-
-    } else {
-
-        inputB = inputB === 0 ? 1 : 0;
-
-        btn.innerText = inputB;
-
-        updateInputStyle(btn, inputB);
-    }
-
-    calculateOutput();
-}
-
-/* STYLE */
-function updateInputStyle(element, value) {
-
-    if (value === 1) {
-
-        element.className =
-            "bg-cyan-950 px-4 py-1.5 rounded font-mono text-xl text-cyan-400 border border-cyan-500 cursor-pointer";
-
-    } else {
-
-        element.className =
-            "bg-gray-800 px-4 py-1.5 rounded font-mono text-xl text-red-500 border border-red-900/50 cursor-pointer";
-    }
-}
-
-/* OUTPUT */
-function calculateOutput() {
-
-    let output = 0;
-
-    switch (currentGate) {
-
-        case 'AND':
-            output = inputA && inputB;
-            break;
-
-        case 'OR':
-            output = inputA || inputB;
-            break;
-
-        case 'NOT':
-            output = !inputA ? 1 : 0;
-            break;
-    }
-
-    output = output ? 1 : 0;
-
-    const outputBox = document.getElementById('output-box');
-    const txtOutput = document.getElementById('txt-output');
-
-    txtOutput.innerText = output;
-
-    if (output === 1) {
-
-        outputBox.className =
-            "w-24 h-24 bg-cyan-950 rounded-xl flex items-center justify-center border-2 border-cyan-400";
-
-        txtOutput.className =
-            "text-4xl font-mono font-bold text-cyan-400 animate-pulse";
-
-    } else {
-
-        outputBox.className =
-            "w-24 h-24 bg-gray-950 rounded-xl flex items-center justify-center border-2 border-red-500";
-
-        txtOutput.className =
-            "text-4xl font-mono font-bold text-red-500";
-    }
-}
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="si" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ICT From Heshan | Premium A/L LMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #050505; color: white; }
+        .cyber-card { background: rgba(10, 10, 15, 0.8); border: 1px solid #1e293b; backdrop-filter: blur(10px); }
+        .text-glow { text-shadow: 0 0 10px rgba(6, 182, 212, 0.5); }
+    </style>
 </head>
-<body class="bg-gray-900 text-white font-sans antialiased">
+<body>
 
-    <div id="loader" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center">
-        <div class="text-center">
-            <div class="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p class="mt-4 text-cyan-400 font-bold tracking-widest">LOADING LMS...</p>
-        </div>
-    </div>
-
-    <div id="signup-gate" class="fixed inset-0 bg-gray-950 z-[999] flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-8 shadow-2xl">
-            <h2 class="text-2xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-6">ICT FROM HESHAN</h2>
-            <form id="gate-signup-form" onsubmit="handleInitialSignup(event)" class="space-y-4">
-                <input type="text" id="gate-name" required placeholder="Full Name" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-sm focus:border-cyan-500 outline-none">
-                <div class="grid grid-cols-2 gap-4">
-                    <select id="gate-institute" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-3 text-xs outline-none">
-                        <option value="">Institute...</option>
-                        <option>Pencil Opera Kurunegala</option>
-                        <option>Ziyon Kurunegala</option>
-                        <option>Sipwin Kurunegala</option>
-                    </select>
-                    <select id="gate-year" required class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-3 text-xs outline-none">
-                        <option value="">Year...</option>
-                        <option>2026</option><option>2027</option><option>2028</option>
-                    </select>
-                </div>
-                <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-black py-3 rounded-lg transition">Submit & Enter</button>
+    <div id="signup-screen" class="fixed inset-0 z-[100] bg-black flex items-center justify-center p-4">
+        <div class="cyber-card p-8 rounded-3xl w-full max-w-md border-cyan-500/50 shadow-[0_0_50px_-12px_rgba(6,182,212,0.3)]">
+            <h2 class="text-3xl font-bold text-cyan-400 mb-6 text-center tracking-widest">ICT FROM HESHAN</h2>
+            <form onsubmit="initDashboard(event)" class="space-y-4">
+                <input type="text" id="reg-name" required placeholder="සම්පූර්ණ නම" class="w-full bg-slate-900 border-slate-700 border p-3 rounded-lg focus:border-cyan-500 outline-none">
+                <select id="reg-year" class="w-full bg-slate-900 border-slate-700 border p-3 rounded-lg outline-none">
+                    <option value="2026">2026 A/L</option><option value="2027">2027 A/L</option><option value="2028">2028 A/L</option>
+                </select>
+                <select id="reg-inst" class="w-full bg-slate-900 border-slate-700 border p-3 rounded-lg outline-none">
+                    <option value="Pencil Opera">Pencil Opera (Kurunegala)</option>
+                    <option value="Ziyon Pen">Ziyon Pen (Horana)</option>
+                    <option value="Sisulka">Sisulka (Rathnapura)</option>
+                </select>
+                <input type="text" id="reg-id" required placeholder="Institute ID Number" class="w-full bg-slate-900 border-slate-700 border p-3 rounded-lg outline-none">
+                <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 py-3 rounded-lg font-bold text-black uppercase tracking-widest">Login to LMS</button>
             </form>
         </div>
     </div>
 
-    <div id="main-content" class="hidden">
-        <nav class="bg-gray-800 border-b border-gray-700 p-4 sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <span class="text-xl font-bold text-cyan-400">ICT FROM HESHAN</span>
-                <div class="text-right">
-                    <div id="nav-user-name" class="font-bold">Student Name</div>
-                    <div id="nav-user-badge" class="text-xs text-cyan-400">Institute</div>
-                </div>
-            </div>
+    <div id="dashboard" class="hidden min-h-screen">
+        <nav class="p-6 flex justify-between items-center border-b border-slate-800">
+            <h1 class="text-2xl font-bold text-cyan-400">ICT FROM HESHAN</h1>
+            <div id="user-info" class="text-sm font-mono text-cyan-500"></div>
         </nav>
 
-        <section class="py-10 px-4 max-w-4xl mx-auto">
-            <div class="bg-gray-800 rounded-2xl p-6 border border-cyan-500/20 flex gap-6 items-center">
-                <img src="https://i.pravatar.cc/150" class="w-20 h-20 rounded-full border-2 border-cyan-500">
-                <div>
-                    <h2 class="text-xl font-bold">Dashboard</h2>
-                    <p class="text-sm text-gray-400">Welcome to your Learning Space.</p>
-                </div>
+        <section class="p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="cyber-card p-6 rounded-2xl hover:border-cyan-500 transition cursor-pointer">
+                <i class="fa-solid fa-microchip text-3xl text-cyan-500"></i>
+                <h3 class="mt-4 font-bold">Simulators</h3>
+            </div>
+            <div class="cyber-card p-6 rounded-2xl hover:border-emerald-500 transition cursor-pointer">
+                <i class="fa-solid fa-play text-3xl text-emerald-500"></i>
+                <h3 class="mt-4 font-bold">Recordings</h3>
+            </div>
+            <div class="cyber-card p-6 rounded-2xl hover:border-purple-500 transition cursor-pointer">
+                <i class="fa-solid fa-wallet text-3xl text-purple-500"></i>
+                <h3 class="mt-4 font-bold">Pay Fees</h3>
+            </div>
+            <div class="cyber-card p-6 rounded-2xl border-orange-900 bg-orange-950/20">
+                <i class="fa-solid fa-user-shield text-3xl text-orange-500"></i>
+                <h3 class="mt-4 font-bold">Admin Panel</h3>
             </div>
         </section>
 
-        <section class="p-4 max-w-6xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-gray-950 p-6 rounded-xl border border-gray-800">
-                    <h2 class="text-xl font-bold mb-4">Logic Gate Simulator</h2>
-                    <div id="output-box" class="w-20 h-20 bg-gray-900 border border-red-500 flex items-center justify-center text-3xl font-bold text-red-500 rounded-xl">0</div>
-                </div>
-                <div class="bg-gray-950 p-6 rounded-xl border border-gray-800">
-                    <h2 class="text-xl font-bold mb-4">Number Converter</h2>
-                    <input type="text" id="num-decimal" oninput="convertFrom('decimal')" placeholder="Decimal..." class="w-full bg-gray-900 p-3 rounded border border-gray-700 outline-none">
-                </div>
-            </div>
-        </section>
-
-        <section class="py-16 bg-gray-950">
-            <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-gray-900 rounded-xl overflow-hidden border border-gray-800"><div class="h-40 bg-gray-800"></div><p class="p-4">Python Lesson</p></div>
-                <div class="bg-gray-900 rounded-xl overflow-hidden border border-gray-800"><div class="h-40 bg-gray-800"></div><p class="p-4">Networking</p></div>
-                <div class="bg-gray-900 rounded-xl overflow-hidden border border-gray-800"><div class="h-40 bg-gray-800"></div><p class="p-4">Database</p></div>
-            </div>
-        </section>
-
-        <div class="fixed bottom-24 right-5 z-50">
-            <button onclick="toggleAIBox()" class="bg-cyan-500 w-14 h-14 rounded-full shadow-lg"><i class="fa-solid fa-robot text-black text-2xl"></i></button>
-            <div id="ai-box" class="hidden absolute bottom-16 right-0 w-80 bg-gray-900 border border-gray-700 rounded-2xl p-4">
-                <p class="text-sm text-gray-300">ICT AI Assistant here! Ask anything.</p>
-                <input type="text" class="w-full mt-3 bg-gray-950 p-2 rounded border border-gray-700 outline-none">
+        <div class="fixed bottom-10 right-10 z-50">
+            <button onclick="toggleChat()" class="w-16 h-16 bg-cyan-600 rounded-full flex items-center justify-center animate-bounce shadow-2xl">
+                <i class="fa-solid fa-robot text-2xl"></i>
+            </button>
+            <div id="chat-box" class="hidden absolute bottom-20 right-0 w-80 cyber-card p-4 rounded-xl">
+                <h4 class="font-bold border-b border-slate-700 pb-2 mb-2">ICT AI Assistant</h4>
+                <p class="text-sm text-slate-400">හේෂාන් සර්ගේ පන්තියේ පාඩම් ගැන ඔයාට මොනවාද දැනගන්න ඕනේ?</p>
+                <input type="text" placeholder="Type here..." class="w-full mt-4 bg-slate-950 p-2 rounded outline-none border border-slate-700 text-xs">
             </div>
         </div>
-
-        <div class="fixed bottom-5 left-5 bg-gray-800 px-4 py-2 rounded-xl text-cyan-400 font-mono text-sm border border-gray-700">
-            <div id="live-clock"></div>
-        </div>
-
-        <a href="https://wa.me/94700000000" target="_blank" class="fixed bottom-5 right-5 bg-green-500 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"><i class="fa-brands fa-whatsapp text-3xl"></i></a>
-
     </div>
 
     <script>
-        // Loader
-        window.addEventListener('load', () => setTimeout(() => document.getElementById('loader').style.display = 'none', 1500));
-
-        // Signup Logic
-        function handleInitialSignup(event) {
-            event.preventDefault();
-            const name = document.getElementById('gate-name').value;
-            document.getElementById('nav-user-name').innerText = name;
-            localStorage.setItem('studentName', name);
-            document.getElementById('signup-gate').classList.add('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
+        function initDashboard(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            document.getElementById('user-info').innerText = "STUDENT: " + name.toUpperCase();
+            document.getElementById('signup-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
         }
 
-        // Clock
-        function updateClock() { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(); }
-        setInterval(updateClock, 1000);
-
-        // AI Box
-        function toggleAIBox() { document.getElementById('ai-box').classList.toggle('hidden'); }
-
-        // Logic/Converter functions from previous code...
-        function convertFrom(type) { /* ඇතුලත් කරන්න */ }
+        function toggleChat() {
+            document.getElementById('chat-box').classList.toggle('hidden');
+        }
     </script>
 </body>
 </html>
 
-</script>
-
-</body>
-                        </html>
