@@ -67,6 +67,116 @@
         function toggleGate() { state = state === 0 ? 1 : 0; document.getElementById('gate').innerText = state; }
 
         function toggleChat() { alert("AI Assistant: හේෂාන් සර්ගේ පන්තියට සාදරයෙන් පිළිගනිමු!"); }
+       import React, { useState } from 'react';
+import { db } from './firebase'; // අපේ කලින් හදපු firebase.js
+import { collection, addDoc } from "firebase/firestore";
+
+const AdminPanel = () => {
+  const [lesson, setLesson] = useState({ title: '', link: '', batch: '2026' });
+
+  const addLesson = async () => {
+    try {
+      await addDoc(collection(db, "lessons"), {
+        title: lesson.title,
+        link: lesson.link,
+        batch: lesson.batch,
+        timestamp: new Date()
+      });
+      alert("පාඩම සාර්ථකව එකතු විය!");
+    } catch (e) {
+      alert("Error: " + e.message);
+    }
+  };
+
+  return (
+    <div className="p-8 bg-slate-900 rounded-3xl border border-cyan-500/20 text-white">
+      <h2 className="text-2xl font-bold mb-6">Admin Panel - Add Lesson</h2>
+      <div className="space-y-4">
+        <input 
+          placeholder="පාඩමේ නම" 
+          onChange={(e) => setLesson({...lesson, title: e.target.value})}
+          className="w-full bg-slate-800 p-3 rounded-lg"
+        />
+        <input 
+          placeholder="Video Link (YouTube/Cloud)" 
+          onChange={(e) => setLesson({...lesson, link: e.target.value})}
+          className="w-full bg-slate-800 p-3 rounded-lg"
+        />
+        <select onChange={(e) => setLesson({...lesson, batch: e.target.value})} className="w-full bg-slate-800 p-3 rounded-lg">
+          <option value="2026">2026 A/L</option>
+          <option value="2027">2027 A/L</option>
+          <option value="2028">2028 A/L</option>
+        </select>
+        <button onClick={addLesson} className="bg-cyan-600 px-8 py-3 rounded-lg font-bold">Add Lesson</button>
+      </div>
+    </div>
+  );
+};
+import { db } from './firebase'; // ඉහත සෑදූ ගොනුව
+import { doc, setDoc } from "firebase/firestore";
+
+async function registerStudent(uid, name, inst, year) {
+  try {
+    await setDoc(doc(db, "students", uid), {
+      name: name,
+      institute: inst,
+      batch: year,
+      joinedAt: new Date(),
+      status: "pending" // ගෙවීම් කිරීමෙන් පසු මෙය active කරමු
+    });
+    console.log("සිසුවා සාර්ථකව රෙජිස්ටර් විය!");
+  } catch (e) {
+    console.error("Error: ", e);
+  }
+}
+// PayHere වෙතින් එන පණිවිඩය තහවුරු කිරීම (Webhook)
+exports.payhereWebhook = functions.https.onRequest(async (req, res) => {
+    const { order_id, status_code, md5sig } = req.body;
+
+    // තහවුරු කිරීමේ ලොජික් එක (Security verification)
+    if (status_code === '2') { // PayHere සාර්ථක ගෙවීම් කේතය
+        const studentRef = db.collection('students').doc(order_id);
+        await studentRef.update({
+            status: "active",
+            activatedAt: new Date()
+        });
+        res.status(200).send("Access Granted!");
+    } else {
+        res.status(400).send("Payment Failed");
+    }
+});
+// සිසුවාගේ status එක අනුව වීඩියෝ පෙන්වීම
+{studentData.status === 'active' ? (
+    <RecordingLibrary /> // පාඩම් පෙන්වන්න
+) : (
+    <div className="p-10 text-center">
+        <h2 className="text-2xl text-red-500">ඔබ තවමත් ගෙවීම් සිදුකර නොමැත!</h2>
+        <button className="mt-4 bg-cyan-600 px-6 py-2 rounded">ගෙවීම් සිදුකරන්න</button>
+    </div>
+)}
+// AI Chatbot Logic
+async function getAIResponse(userMessage) {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=YOUR_API_KEY`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: userMessage }] }]
+        })
+    });
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+}
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /lessons/{lesson} {
+      allow read: if request.auth != null; // ලොග් වුනු අයට විතරයි පාඩම් පේන්නේ
+      allow write: if request.auth.token.email == "heshan@yourdomain.com"; // ඔයාට විතරයි පාඩම් ඇඩ් කරන්න පුළුවන්
+    }
+  }
+}
+
     </script>
+    
 </body>
 </html>
