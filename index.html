@@ -1,182 +1,68 @@
-<!DOCTYPE html>
-<html lang="si">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT From Heshan | Full System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background-color: #050505; color: white; font-family: 'Poppins', sans-serif; }
-        .glass { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-    </style>
-</head>
-<body>
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
-    <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
-        <div class="glass p-8 rounded-3xl w-full max-w-md text-center">
-            <h1 class="text-3xl font-bold text-cyan-400 mb-6">ICT FROM HESHAN</h1>
-            <input id="name" type="text" placeholder="නම" class="w-full bg-slate-800 p-3 rounded-lg mb-4 outline-none">
-            <button onclick="login()" class="w-full bg-cyan-600 py-3 rounded-lg font-bold">පද්ධතියට ඇතුල් වන්න</button>
+const App = () => {
+  const [currentPage, setCurrentPage] = useState('home'); // home, dashboard, admin
+  const [user, setUser] = useState(null);
+
+  // 1. SIGNUP COMPONENT
+  const RegisterForm = () => (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+      <div className="bg-slate-900 border border-cyan-500/30 p-8 rounded-3xl w-full max-w-lg shadow-2xl">
+        <h1 className="text-4xl font-black text-cyan-400 mb-2">ICT FROM HESHAN</h1>
+        <p className="text-slate-400 mb-8">ඔබේ අධ්‍යාපන ගමන මෙතැනින් පටන් ගන්න.</p>
+        <div className="space-y-4">
+          <input placeholder="සම්පූර්ණ නම" className="w-full bg-slate-800 p-3 rounded-xl border border-slate-700 focus:border-cyan-500 outline-none" />
+          <select className="w-full bg-slate-800 p-3 rounded-xl border border-slate-700">
+            <option>2026 A/L</option><option>2027 A/L</option><option>2028 A/L</option>
+          </select>
+          <select className="w-full bg-slate-800 p-3 rounded-xl border border-slate-700">
+            <option>Pencil Opera (Kurunegala)</option>
+            <option>Ziyon Pen (Horana)</option>
+            <option>Sisulka (Rathnapura)</option>
+          </select>
+          <button onClick={() => setCurrentPage('dashboard')} className="w-full bg-cyan-600 hover:bg-cyan-500 py-3 rounded-xl font-bold transition">REGISTER NOW</button>
         </div>
-    </div>
+      </div>
+    </motion.div>
+  );
 
-    <div id="main-ui" class="hidden p-8">
-        <nav class="flex justify-between items-center mb-10">
-            <h1 class="text-2xl font-bold text-cyan-400">ICT FROM HESHAN</h1>
-            <div id="user-display" class="bg-slate-800 px-4 py-2 rounded-full"></div>
-        </nav>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="glass p-6 rounded-2xl">
-                <h3 class="font-bold mb-4"><i class="fa-solid fa-microchip mr-2"></i> Logic Gate Sim</h3>
-                <div class="h-20 bg-black flex items-center justify-center text-4xl border border-cyan-500 rounded-xl" id="gate">0</div>
-                <button onclick="toggleGate()" class="mt-4 w-full bg-slate-700 py-2 rounded">Toggle Gate</button>
-            </div>
-
-            <div class="glass p-6 rounded-2xl">
-                <h3 class="font-bold mb-4"><i class="fa-solid fa-video mr-2"></i> Recordings</h3>
-                <ul class="text-sm space-y-2 text-slate-400">
-                    <li>- Number System (Part 1)</li>
-                    <li>- Logic Gates (Advanced)</li>
-                </ul>
-            </div>
-
-            <div class="glass p-6 rounded-2xl border-orange-500 border">
-                <h3 class="font-bold text-orange-500 mb-4">Admin Panel</h3>
-                <input placeholder="පාඩමේ නම" class="w-full bg-black p-2 rounded mb-2 outline-none">
-                <button class="w-full bg-orange-600 py-2 rounded">Save Lesson</button>
-            </div>
+  // 2. DASHBOARD COMPONENT
+  const Dashboard = () => (
+    <div className="min-h-screen bg-slate-950 text-white p-8">
+      <header className="flex justify-between items-center mb-12">
+        <h2 className="text-2xl font-bold italic">WELCOME, ICT SCHOLAR</h2>
+        <div className="flex gap-4">
+          <button className="px-4 py-2 bg-slate-800 rounded-lg hover:bg-slate-700">Recordings</button>
+          <button className="px-4 py-2 bg-cyan-600 rounded-lg font-bold">Simulator</button>
         </div>
-    </div>
+      </header>
 
-    <button onclick="toggleChat()" class="fixed bottom-10 right-10 bg-cyan-600 w-16 h-16 rounded-full shadow-2xl">
-        <i class="fa-solid fa-robot text-2xl"></i>
-    </button>
+      {/* Grid: Lessons + AI Bot + Simulator */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <motion.div whileHover={{ scale: 1.02 }} className="bg-slate-900 p-6 rounded-2xl border border-cyan-900">
+          <h3 className="text-cyan-400 font-bold mb-2">Number Systems</h3>
+          <p className="text-slate-400 text-sm mb-4">සජීවීව පරිවර්තනය කරන්න.</p>
+          <button className="w-full py-2 border border-cyan-600 rounded-lg">Open Simulator</button>
+        </motion.div>
+        
+        <div className="bg-slate-900 p-6 rounded-2xl border border-indigo-900">
+          <h3 className="text-indigo-400 font-bold mb-4">AI Tutor Assistant</h3>
+          <input className="w-full bg-slate-800 p-2 rounded mb-2" placeholder="අහන්න ප්‍රශ්නයක්..." />
+          <button className="w-full bg-indigo-600 py-2 rounded">Ask Gemini</button>
+        </div>
 
-    <script>
-        function login() {
-            const name = document.getElementById('name').value;
-            document.getElementById('user-display').innerText = name;
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('main-ui').classList.remove('hidden');
-        }
-
-        let state = 0;
-        function toggleGate() { state = state === 0 ? 1 : 0; document.getElementById('gate').innerText = state; }
-
-        function toggleChat() { alert("AI Assistant: හේෂාන් සර්ගේ පන්තියට සාදරයෙන් පිළිගනිමු!"); }
-       import React, { useState } from 'react';
-import { db } from './firebase'; // අපේ කලින් හදපු firebase.js
-import { collection, addDoc } from "firebase/firestore";
-
-const AdminPanel = () => {
-  const [lesson, setLesson] = useState({ title: '', link: '', batch: '2026' });
-
-  const addLesson = async () => {
-    try {
-      await addDoc(collection(db, "lessons"), {
-        title: lesson.title,
-        link: lesson.link,
-        batch: lesson.batch,
-        timestamp: new Date()
-      });
-      alert("පාඩම සාර්ථකව එකතු විය!");
-    } catch (e) {
-      alert("Error: " + e.message);
-    }
-  };
-
-  return (
-    <div className="p-8 bg-slate-900 rounded-3xl border border-cyan-500/20 text-white">
-      <h2 className="text-2xl font-bold mb-6">Admin Panel - Add Lesson</h2>
-      <div className="space-y-4">
-        <input 
-          placeholder="පාඩමේ නම" 
-          onChange={(e) => setLesson({...lesson, title: e.target.value})}
-          className="w-full bg-slate-800 p-3 rounded-lg"
-        />
-        <input 
-          placeholder="Video Link (YouTube/Cloud)" 
-          onChange={(e) => setLesson({...lesson, link: e.target.value})}
-          className="w-full bg-slate-800 p-3 rounded-lg"
-        />
-        <select onChange={(e) => setLesson({...lesson, batch: e.target.value})} className="w-full bg-slate-800 p-3 rounded-lg">
-          <option value="2026">2026 A/L</option>
-          <option value="2027">2027 A/L</option>
-          <option value="2028">2028 A/L</option>
-        </select>
-        <button onClick={addLesson} className="bg-cyan-600 px-8 py-3 rounded-lg font-bold">Add Lesson</button>
+        <div className="bg-slate-900 p-6 rounded-2xl border border-orange-900">
+          <h3 className="text-orange-400 font-bold mb-4">Payment Status</h3>
+          <p className="text-red-500 font-bold text-center">Pending Payment</p>
+          <button className="w-full bg-orange-600 py-2 mt-4 rounded">Pay Now (PayHere)</button>
+        </div>
       </div>
     </div>
   );
+
+  return currentPage === 'home' ? <RegisterForm /> : <Dashboard />;
 };
-import { db } from './firebase'; // ඉහත සෑදූ ගොනුව
-import { doc, setDoc } from "firebase/firestore";
 
-async function registerStudent(uid, name, inst, year) {
-  try {
-    await setDoc(doc(db, "students", uid), {
-      name: name,
-      institute: inst,
-      batch: year,
-      joinedAt: new Date(),
-      status: "pending" // ගෙවීම් කිරීමෙන් පසු මෙය active කරමු
-    });
-    console.log("සිසුවා සාර්ථකව රෙජිස්ටර් විය!");
-  } catch (e) {
-    console.error("Error: ", e);
-  }
-}
-// PayHere වෙතින් එන පණිවිඩය තහවුරු කිරීම (Webhook)
-exports.payhereWebhook = functions.https.onRequest(async (req, res) => {
-    const { order_id, status_code, md5sig } = req.body;
+export default App;
 
-    // තහවුරු කිරීමේ ලොජික් එක (Security verification)
-    if (status_code === '2') { // PayHere සාර්ථක ගෙවීම් කේතය
-        const studentRef = db.collection('students').doc(order_id);
-        await studentRef.update({
-            status: "active",
-            activatedAt: new Date()
-        });
-        res.status(200).send("Access Granted!");
-    } else {
-        res.status(400).send("Payment Failed");
-    }
-});
-// සිසුවාගේ status එක අනුව වීඩියෝ පෙන්වීම
-{studentData.status === 'active' ? (
-    <RecordingLibrary /> // පාඩම් පෙන්වන්න
-) : (
-    <div className="p-10 text-center">
-        <h2 className="text-2xl text-red-500">ඔබ තවමත් ගෙවීම් සිදුකර නොමැත!</h2>
-        <button className="mt-4 bg-cyan-600 px-6 py-2 rounded">ගෙවීම් සිදුකරන්න</button>
-    </div>
-)}
-// AI Chatbot Logic
-async function getAIResponse(userMessage) {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=YOUR_API_KEY`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: userMessage }] }]
-        })
-    });
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
-}
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /lessons/{lesson} {
-      allow read: if request.auth != null; // ලොග් වුනු අයට විතරයි පාඩම් පේන්නේ
-      allow write: if request.auth.token.email == "heshan@yourdomain.com"; // ඔයාට විතරයි පාඩම් ඇඩ් කරන්න පුළුවන්
-    }
-  }
-}
-
-    </script>
-    
-</body>
-</html>
