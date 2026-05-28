@@ -1,89 +1,72 @@
 <!DOCTYPE html>
-<html lang="si" class="scroll-smooth">
+<html lang="si">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT From Heshan | Premium A/L LMS</title>
+    <title>ICT From Heshan | Full System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
-        body { font-family: 'Poppins', sans-serif; background: #050505; color: white; }
-        .cyber-card { background: rgba(10, 10, 15, 0.8); border: 1px solid #1e293b; backdrop-filter: blur(10px); }
-        .text-glow { text-shadow: 0 0 10px rgba(6, 182, 212, 0.5); }
+        body { background-color: #050505; color: white; font-family: 'Poppins', sans-serif; }
+        .glass { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
 
-    <div id="signup-screen" class="fixed inset-0 z-[100] bg-black flex items-center justify-center p-4">
-        <div class="cyber-card p-8 rounded-3xl w-full max-w-md border-cyan-500/50 shadow-[0_0_50px_-12px_rgba(6,182,212,0.3)]">
-            <h2 class="text-3xl font-bold text-cyan-400 mb-6 text-center tracking-widest">ICT FROM HESHAN</h2>
-            <form onsubmit="initDashboard(event)" class="space-y-4">
-                <input type="text" id="reg-name" required placeholder="සම්පූර්ණ නම" class="w-full bg-slate-900 border-slate-700 border p-3 rounded-lg focus:border-cyan-500 outline-none">
-                <select id="reg-year" class="w-full bg-slate-900 border-slate-700 border p-3 rounded-lg outline-none">
-                    <option value="2026">2026 A/L</option><option value="2027">2027 A/L</option><option value="2028">2028 A/L</option>
-                </select>
-                <select id="reg-inst" class="w-full bg-slate-900 border-slate-700 border p-3 rounded-lg outline-none">
-                    <option value="Pencil Opera">Pencil Opera (Kurunegala)</option>
-                    <option value="Ziyon Pen">Ziyon Pen (Horana)</option>
-                    <option value="Sisulka">Sisulka (Rathnapura)</option>
-                </select>
-                <input type="text" id="reg-id" required placeholder="Institute ID Number" class="w-full bg-slate-900 border-slate-700 border p-3 rounded-lg outline-none">
-                <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 py-3 rounded-lg font-bold text-black uppercase tracking-widest">Login to LMS</button>
-            </form>
+    <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
+        <div class="glass p-8 rounded-3xl w-full max-w-md text-center">
+            <h1 class="text-3xl font-bold text-cyan-400 mb-6">ICT FROM HESHAN</h1>
+            <input id="name" type="text" placeholder="නම" class="w-full bg-slate-800 p-3 rounded-lg mb-4 outline-none">
+            <button onclick="login()" class="w-full bg-cyan-600 py-3 rounded-lg font-bold">පද්ධතියට ඇතුල් වන්න</button>
         </div>
     </div>
 
-    <div id="dashboard" class="hidden min-h-screen">
-        <nav class="p-6 flex justify-between items-center border-b border-slate-800">
+    <div id="main-ui" class="hidden p-8">
+        <nav class="flex justify-between items-center mb-10">
             <h1 class="text-2xl font-bold text-cyan-400">ICT FROM HESHAN</h1>
-            <div id="user-info" class="text-sm font-mono text-cyan-500"></div>
+            <div id="user-display" class="bg-slate-800 px-4 py-2 rounded-full"></div>
         </nav>
 
-        <section class="p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div class="cyber-card p-6 rounded-2xl hover:border-cyan-500 transition cursor-pointer">
-                <i class="fa-solid fa-microchip text-3xl text-cyan-500"></i>
-                <h3 class="mt-4 font-bold">Simulators</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="glass p-6 rounded-2xl">
+                <h3 class="font-bold mb-4"><i class="fa-solid fa-microchip mr-2"></i> Logic Gate Sim</h3>
+                <div class="h-20 bg-black flex items-center justify-center text-4xl border border-cyan-500 rounded-xl" id="gate">0</div>
+                <button onclick="toggleGate()" class="mt-4 w-full bg-slate-700 py-2 rounded">Toggle Gate</button>
             </div>
-            <div class="cyber-card p-6 rounded-2xl hover:border-emerald-500 transition cursor-pointer">
-                <i class="fa-solid fa-play text-3xl text-emerald-500"></i>
-                <h3 class="mt-4 font-bold">Recordings</h3>
-            </div>
-            <div class="cyber-card p-6 rounded-2xl hover:border-purple-500 transition cursor-pointer">
-                <i class="fa-solid fa-wallet text-3xl text-purple-500"></i>
-                <h3 class="mt-4 font-bold">Pay Fees</h3>
-            </div>
-            <div class="cyber-card p-6 rounded-2xl border-orange-900 bg-orange-950/20">
-                <i class="fa-solid fa-user-shield text-3xl text-orange-500"></i>
-                <h3 class="mt-4 font-bold">Admin Panel</h3>
-            </div>
-        </section>
 
-        <div class="fixed bottom-10 right-10 z-50">
-            <button onclick="toggleChat()" class="w-16 h-16 bg-cyan-600 rounded-full flex items-center justify-center animate-bounce shadow-2xl">
-                <i class="fa-solid fa-robot text-2xl"></i>
-            </button>
-            <div id="chat-box" class="hidden absolute bottom-20 right-0 w-80 cyber-card p-4 rounded-xl">
-                <h4 class="font-bold border-b border-slate-700 pb-2 mb-2">ICT AI Assistant</h4>
-                <p class="text-sm text-slate-400">හේෂාන් සර්ගේ පන්තියේ පාඩම් ගැන ඔයාට මොනවාද දැනගන්න ඕනේ?</p>
-                <input type="text" placeholder="Type here..." class="w-full mt-4 bg-slate-950 p-2 rounded outline-none border border-slate-700 text-xs">
+            <div class="glass p-6 rounded-2xl">
+                <h3 class="font-bold mb-4"><i class="fa-solid fa-video mr-2"></i> Recordings</h3>
+                <ul class="text-sm space-y-2 text-slate-400">
+                    <li>- Number System (Part 1)</li>
+                    <li>- Logic Gates (Advanced)</li>
+                </ul>
+            </div>
+
+            <div class="glass p-6 rounded-2xl border-orange-500 border">
+                <h3 class="font-bold text-orange-500 mb-4">Admin Panel</h3>
+                <input placeholder="පාඩමේ නම" class="w-full bg-black p-2 rounded mb-2 outline-none">
+                <button class="w-full bg-orange-600 py-2 rounded">Save Lesson</button>
             </div>
         </div>
     </div>
 
+    <button onclick="toggleChat()" class="fixed bottom-10 right-10 bg-cyan-600 w-16 h-16 rounded-full shadow-2xl">
+        <i class="fa-solid fa-robot text-2xl"></i>
+    </button>
+
     <script>
-        function initDashboard(e) {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value;
-            document.getElementById('user-info').innerText = "STUDENT: " + name.toUpperCase();
-            document.getElementById('signup-screen').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
+        function login() {
+            const name = document.getElementById('name').value;
+            document.getElementById('user-display').innerText = name;
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('main-ui').classList.remove('hidden');
         }
 
-        function toggleChat() {
-            document.getElementById('chat-box').classList.toggle('hidden');
-        }
+        let state = 0;
+        function toggleGate() { state = state === 0 ? 1 : 0; document.getElementById('gate').innerText = state; }
+
+        function toggleChat() { alert("AI Assistant: හේෂාන් සර්ගේ පන්තියට සාදරයෙන් පිළිගනිමු!"); }
     </script>
 </body>
 </html>
-
